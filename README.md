@@ -33,7 +33,7 @@
 
 * Clicking "OK" on the "News_Add" Modal Dialog will add the news to Local Storage and display it whenever the ticker symbol is selected.
 
-![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
+![Mockup](https://github.com/ScottVandervort/stock-app/blob/master/mockup.png)
 
 ## Stock Data
 
@@ -43,7 +43,7 @@ Stock information will be fetched live from a REST API at https://www.alphavanta
 
 I found a cool tool that generates Typescript classes from JSON. This will come in handy as the JSON returned by https://www.alphavantage.co/ has 
 
-## Angular Seed
+# Angular Seed
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.4.
 
