@@ -3,7 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  tickerServiceUrl:"https://www.alphavantage.co/",
+  tickerServiceApiKey:"53RP7O2DGDHLVXU3"
 };
 
 /*
