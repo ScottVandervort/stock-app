@@ -50,9 +50,13 @@ I found a cool tool that generates Typescript classes from JSON. This will come 
 I added a Routing Module. with the following routes :
 
 /quote
+
 /quote/{msft}
+
 /quote/{msft}/details
+
 /quote/{msft}/addNews
+
 /quote/{msft}/addSymbol
 
 I only want to show ticker-details, ticker-chart, and ticker-news when a quote is selected so I created a ticker-container and nested the informational components within it. When a symbol is selected from ticker-component I plan on adding it to the url as a param ( ex: msft; above ). I am using the ActivatedRoute class from the Router Module to "sniff" for the param on the url. I only display the quote-container if a symbol exists. This link was a lot of help: [Stack Overflow](https://stackoverflow.com/questions/45309131/angular-2-4-how-to-get-route-parameters-in-app-component)
