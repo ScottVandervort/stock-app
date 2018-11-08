@@ -1,0 +1,15 @@
+<p>
+  ticker works!
+</p>
+
+<div *ngIf="showDetails == true">
+  <a [routerLink]="['details']">Details</a> |
+  <a [routerLink]="['addNews']">Add News</a> |
+  <a [routerLink]="['addSymbol']">Add Symbol</a>  
+</div>
+
+<p>
+
+</p>
+
+<router-outlet></router-outlet>
