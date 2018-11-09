@@ -1,5 +1,6 @@
 import { NgModule }              from '@angular/core';
 import { RouterModule, Routes }  from '@angular/router';
+import {APP_BASE_HREF} from '@angular/common';
 
 import { TickerComponent } from './components/ticker/ticker.component';
 import { TickerAddComponent } from './components/ticker-add/ticker-add.component';
@@ -20,6 +21,11 @@ const appRoutes: Routes = [
 ];
 
 @NgModule({
+  providers: [
+    /*  This is required to prevent error, "Please provide a value for the APP_BASE_HREF token or add a base element to the document".
+        Go here: https://angular.io/api/common/APP_BASE_HREF for more info. */
+    {provide: APP_BASE_HREF, useValue: '/stockapp'}
+  ],
   imports: [
     RouterModule.forRoot(
       appRoutes,

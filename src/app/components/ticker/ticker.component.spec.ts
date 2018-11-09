@@ -1,4 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+// Import RouterTestingModule here ( and in Testbed below ) if Component html implements <router-outlet>
+import { RouterTestingModule } from '@angular/router/testing'; 
 
 import { TickerComponent } from './ticker.component';
 
@@ -6,8 +8,9 @@ describe('TickerComponent', () => {
   let component: TickerComponent;
   let fixture: ComponentFixture<TickerComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(async(() => {    
     TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
       declarations: [ TickerComponent ]
     })
     .compileComponents();

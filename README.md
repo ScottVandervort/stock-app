@@ -35,15 +35,18 @@
 
 ![Mockup](https://github.com/ScottVandervort/stock-app/blob/master/mockup.png)
 
-## Stock Data
+## Additional Notes
+
+### 11/6/2018
+
+#### Live Stock Data
 
 Stock information will be fetched live from a REST API at https://www.alphavantage.co/ The service is free and it will make the application so much more useable that with static data.
 
 The best thing is that the service appears to be CORS-enabled by default so I can call it directly from the client w/o running into cross-domain issues.
 
-## Additional Notes
+#### Generating Typescript classes from JSON
 
-### 11/6/2018
 I found a cool tool that generates Typescript classes from JSON. This will come in handy as the JSON returned by https://www.alphavantage.co/ is very poorly formatted ( it's keys have spaces).
 
 ### 11/7/2018
@@ -61,6 +64,30 @@ I added a Routing Module. with the following routes :
 
 I only want to show ticker-details, ticker-chart, and ticker-news when a quote is selected so I created a ticker-container and nested the informational components within it. When a symbol is selected from ticker-component I plan on adding it to the url as a param ( ex: msft; above ). I am using the ActivatedRoute class from the Router Module to "sniff" for the param on the url. I only display the quote-container if a symbol exists. This link was a lot of help: [Stack Overflow](https://stackoverflow.com/questions/45309131/angular-2-4-how-to-get-route-parameters-in-app-component)
 
+### 11/08/2018
+Persistance to local storage is going to be managed by a Service. 
+
+#### Setting up Debugging in Visual Studio Code
+
+I Added configuration/tasks for running/debugging an Angular application in Visual Studio Code. Microsoft has some nice "recipes" for configuring Visual Studio Code. You can check out the recipe link [here][vs-code Recipes](https://github.com/Microsoft/vscode-recipes/tree/master/Angular-CLI)
+
+Debugging in Visual Studio Code is nice because it automatically maps the stuff that is running in the browser ( ES5 ) with your soruce code ( Typescript / ES6 ). This way you can debug your soruce code directy - not the stuff transpiled by Webpack/Babble. It's also nice to be able to write and debug within the same IDE and not have to switch back and forth from Chrome to Visual Studio Code.
+
+After following the recipes to add the suggested Configurations and Tasks. 
+
+You will need to run "npm start" from the terminal and then run the "ng serve" configuration to debug the application.
+
+You will need to run "npm run test" from the terminal and then run the "ng test" configuration to debug the application.
+
+### 11/09/2018 
+
+#### Angular Routing Module Caused AppComponent Test to Fail.
+
+After implementing Routing and migrating it to a Module I kept getting an error when running my unit tests for the root Component ( appComponent ): "Please provide a value for the APP_BASE_HREF token or add a base element to the document."
+
+Strangely, the error was NOT occuring at runtime. 
+
+To fix the error I followed [these instructions on the Angular website](https://angular.io/api/common/APP_BASE_HREF). The router needs to know which "base url" to use when navigating your routes.
 
 # Angular Seed
 
