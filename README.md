@@ -184,22 +184,17 @@ NavigationComponent :
 NavigationComponent HTML:
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light"/>
-        
-
         <ul class="navbar-nav mr-auto"/>
         
             ...
         
             <li *ngIf="navigationService.isAddNewsVisible && navigationService.ticker " class="nav-item"/>
-        
-            <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a>
-        
-            </li>            
-        
+                <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a>
+            </li>           
         </ul>
         
-        </div>;
-    
+        ...
+
     </nav>
 
 #### Determining the Active Route.
