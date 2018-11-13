@@ -146,18 +146,18 @@ NavigationService :
     })
     export class NavigationService {
 
-    isAddNewsVisible : boolean = false;
-    ticker : string = null;
+        isAddNewsVisible : boolean = false;
+        ticker : string = null;
 
-    constructor() {}
+        constructor() {}
 
-    toggleAddNewsNavItem( show : boolean ) {
-        this.isAddNewsVisible = show;
-    } 
+        toggleAddNewsNavItem( show : boolean ) {
+            this.isAddNewsVisible = show;
+        } 
 
-    setTicker( ticker: string) {
-        this.ticker = ticker;
-    }
+        setTicker( ticker: string) {
+            this.ticker = ticker;
+        }
     }
 
 
@@ -182,16 +182,16 @@ NavigationComponent :
 
 
 NavigationComponent HTML:
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    &lt;nav class="navbar navbar-expand-lg navbar-light bg-light"&gt;
         ...
-        <ul class="navbar-nav mr-auto">    
+        &lt;ul class="navbar-nav mr-auto"&gt;
             ...
-            <li *ngIf="navigationService.isAddNewsVisible && navigationService.ticker " class="nav-item">
-            <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a>
-            </li>            
-        </ul>
-        </div>
-    </nav>
+            &lt;li *ngIf="navigationService.isAddNewsVisible && navigationService.ticker " class="nav-item"&gt;
+            &lt;a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News&lt;/a&gt;
+            &lt;/li&gt;            
+        &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
 
 #### Determining the Active Route.
 
