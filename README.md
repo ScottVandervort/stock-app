@@ -182,6 +182,7 @@ NavigationComponent :
 
 
 NavigationComponent HTML:
+
     &lt;nav class="navbar navbar-expand-lg navbar-light bg-light"&gt;
         ...
         &lt;ul class="navbar-nav mr-auto"&gt;
