@@ -97,14 +97,14 @@ To install Boostrap ( latest; or, 4 ) run this: "npm install --save bootstrap"
 
 And then add this to the following files:
 
-            "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "src/styles.css"
-            ],
-            [angular.json]
+    "styles": [
+        "node_modules/bootstrap/dist/css/bootstrap.min.css",
+        "src/styles.css"
+    ],
+    [angular.json]
 
-            @import '~bootstrap/dist/css/bootstrap.min.css';
-            [styles.css]
+    @import '~bootstrap/dist/css/bootstrap.min.css';
+    [styles.css]
 
 Installing Boostrap like this means that the Bootstrap .css will by packaged into your application by Webpack. A more performant way of doing this would be through a CDN.            
 
@@ -138,93 +138,93 @@ If NavigationComponent and TickerContainerComponent had a direct parent/child re
 I created a NavigationService to manage the navigation items. The NavigationService is injected into TickerContainerComponent and NavigationComponent. The TickerContainerComponent updates the Service with the selected id ( i.e., ticker ) and the Service in turn updates NavigationComponent.
  
 NavigationService :
-'''
-import { Injectable } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class NavigationService {
+    import { Injectable } from '@angular/core';
 
-  isAddNewsVisible : boolean = false;
-  ticker : string = null;
+    @Injectable({
+    providedIn: 'root'
+    })
+    export class NavigationService {
 
-  constructor() {}
+    isAddNewsVisible : boolean = false;
+    ticker : string = null;
 
-  toggleAddNewsNavItem( show : boolean ) {
-    this.isAddNewsVisible = show;
-  } 
+    constructor() {}
 
-  setTicker( ticker: string) {
-    this.ticker = ticker;
-  }
-}
-'''
+    toggleAddNewsNavItem( show : boolean ) {
+        this.isAddNewsVisible = show;
+    } 
+
+    setTicker( ticker: string) {
+        this.ticker = ticker;
+    }
+    }
+
 
 NavigationComponent :
-'''
-import { Component, OnInit } from '@angular/core';
-import { NavigationService } from 'src/app/services/navigation.service';
 
-@Component({
-  selector: 'app-navigation',
-  templateUrl: './navigation.component.html',
-  styleUrls: ['./navigation.component.css']
-})
-export class NavigationComponent implements OnInit {
+    import { Component, OnInit } from '@angular/core';
+    import { NavigationService } from 'src/app/services/navigation.service';
 
-  isCollapsed: boolean = true;
+    @Component({
+    selector: 'app-navigation',
+    templateUrl: './navigation.component.html',
+    styleUrls: ['./navigation.component.css']
+    })
+    export class NavigationComponent implements OnInit {
 
-  constructor(public navigationService: NavigationService) {}
+    isCollapsed: boolean = true;
 
-  ngOnInit() {}
-}
-'''
+    constructor(public navigationService: NavigationService) {}
+
+    ngOnInit() {}
+    }
+
 
 NavigationComponent HTML:
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    ...
-      <ul class="navbar-nav mr-auto">    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         ...
-        <li *ngIf="navigationService.isAddNewsVisible && navigationService.ticker " class="nav-item">
-          <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a>
-        </li>            
-      </ul>
-    </div>
-</nav>
+        <ul class="navbar-nav mr-auto">    
+            ...
+            <li *ngIf="navigationService.isAddNewsVisible && navigationService.ticker " class="nav-item">
+            <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a>
+            </li>            
+        </ul>
+        </div>
+    </nav>
 
 #### Determining the Active Route.
 
 To determine which ticker symbol is selected I use the ActivatedRoute class from the Router Module to "sniff" for the param on the url. This [StackOverflow]((https://stackoverflow.com/questions/45309131/angular-2-4-how-to-get-route-parameters-in-app-component) article was a lot of help!
 
 TicketContainerComponent :
-'''
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { NavigationService } from 'src/app/services/navigation.service';
 
-@Component({
-  selector: 'app-ticker-container',
-  templateUrl: './ticker-container.component.html',
-  styleUrls: ['./ticker-container.component.css']
-})
-export class TickerContainerComponent implements OnInit {
+    import { Component, OnInit } from '@angular/core';
+    import { ActivatedRoute } from '@angular/router';
+    import { NavigationService } from 'src/app/services/navigation.service';
 
-  constructor(private route: ActivatedRoute, private navigationService: NavigationService) {}
+    @Component({
+    selector: 'app-ticker-container',
+    templateUrl: './ticker-container.component.html',
+    styleUrls: ['./ticker-container.component.css']
+    })
+    export class TickerContainerComponent implements OnInit {
 
-  ngOnInit() {
+    constructor(private route: ActivatedRoute, private navigationService: NavigationService) {}
 
-    if (typeof this.route.snapshot.params['id'] != 'undefined') {
-      this.navigationService.toggleAddNewsNavItem(true);
-      this.navigationService.setTicker( this.route.snapshot.params['id']);
+    ngOnInit() {
+
+        if (typeof this.route.snapshot.params['id'] != 'undefined') {
+        this.navigationService.toggleAddNewsNavItem(true);
+        this.navigationService.setTicker( this.route.snapshot.params['id']);
+        }
+        else {
+        this.navigationService.toggleAddNewsNavItem(false);
+        this.navigationService.setTicker(null);
+        }
     }
-    else {
-      this.navigationService.toggleAddNewsNavItem(false);
-      this.navigationService.setTicker(null);
     }
-  }
-}
-'''
+
 
 # Angular Seed
 
