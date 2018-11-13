@@ -9,7 +9,7 @@
 
 ## Here are some detailed requirements.
 
-* The Application will be made up of 6 widgets - Chart, Ticker, News, Ticker_Add, Ticker_Details, News_Add.
+* The Application will be made up of 6 widgets - Navigation, Chart, Ticker, News, Ticker_Add, Ticker_Details, News_Add.
 
 * Devices with small viewports will display the widgets in one column. 
 
@@ -17,19 +17,19 @@
 
 * The "Ticker" Widget will always be the first displayed ( top and/or top-right ).
 
-* Initially only the "Ticker" Widget will be displayed.
+* Initially only the "Ticker" Widget will be displayed. 
 
 * The "Ticker" Widget will load symbols from Local Storage.
 
-* Clicking on "Add" on the "Ticker" Widget will display the "Ticker_Add" in a Modal Dialog.
+* Clicking on "Add" on the "Navigation" Widget will display the "Ticker_Add" in a Modal Dialog.
 
 * Clicking "OK" on the "Ticker_Add" Modal Dialog will add the Ticker Symbol to Local Storage and display it in the "Ticker" widget.
 
-* Clicking on a ticker symbol on the "Ticker" Widget will highlight it and display the "Chart", "Ticker_Details", and "News" for the symbol.
+* Clicking on a ticker symbol on the "Ticker" Widget will display the "Chart", "Ticker_Details", and "News" for the symbol.
 
 * The "News" widget will load news for the ticker symbol from Local Storage.
 
-* Clicking on "Add" on the "News" Widget will display "News_Add" in a Modal Dialog.
+* Clicking on "Add" on the "Navigation" Widget will display "News_Add" in a Modal Dialog.
 
 * Clicking "OK" on the "News_Add" Modal Dialog will add the news to Local Storage and display it whenever the ticker symbol is selected.
 
@@ -52,17 +52,17 @@ I found a cool tool that generates Typescript classes from JSON. This will come 
 ### 11/7/2018
 I added a Routing Module. with the following routes :
 
-/quote
+    const appRoutes: Routes = [
+    { path: '', component: TickerComponent },   
+    { path: 'addSymbol', component: TickerAddComponent },
+    { path: 'details/:id', component: TickerContainerComponent,
+        children:[       
+        { path: 'addNews', component: TickerNewsAddComponent},       
+        ] 
+    }      
+    ];
 
-/quote/{msft}
-
-/quote/{msft}/details
-
-/quote/{msft}/addNews
-
-/quote/{msft}/addSymbol
-
-I only want to show ticker-details, ticker-chart, and ticker-news when a quote is selected so I created a ticker-container and nested the informational components within it. When a symbol is selected from ticker-component I plan on adding it to the url as a param ( ex: msft; above ). I am using the ActivatedRoute class from the Router Module to "sniff" for the param on the url. I only display the quote-container if a symbol exists. This link was a lot of help: [Stack Overflow](https://stackoverflow.com/questions/45309131/angular-2-4-how-to-get-route-parameters-in-app-component)
+I only want to show the ticker's details, chart, and news when a quote is selected so I created a container ( TickerContainerComponent ) and nested the informational components within it ( TickerChartComponent, TickerDetailsComponent, and TickerNewsComponent). 
 
 ### 11/08/2018
 Persistance to local storage is going to be managed by a Service. 
@@ -88,6 +88,143 @@ After implementing Routing and migrating it to a Module I kept getting an error 
 Strangely, the error was NOT occuring at runtime. 
 
 To fix the error I followed [these instructions on the Angular website](https://angular.io/api/common/APP_BASE_HREF). The router needs to know which "base url" to use when navigating your routes.
+
+### 11/11/2018 
+
+I am using Bootstrap for my layout. Boostrap makes it eas(ier) to create a responsive layout - although CSS Flexbox and CSS Grid are giving it a run for its money.  You can use Bootstrap just to render your layout ( .css-only ). You can also use its library of widgets ( autocomplete, modal dialog, accordiaon, etc ). The later uses JQuery by default. JQuery w/ ANgualr is generally considered bad form ( more on this in a sec' ). Fortunately, there is [also a Angular-native library](https://ng-bootstrap.github.io/#/home) that you can use as well.
+
+To install Boostrap ( latest; or, 4 ) run this: "npm install --save bootstrap"
+
+And then add this to the following files:
+
+            "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/styles.css"
+            ],
+            [angular.json]
+
+            @import '~bootstrap/dist/css/bootstrap.min.css';
+            [styles.css]
+
+Installing Boostrap like this means that the Bootstrap .css will by packaged into your application by Webpack. A more performant way of doing this would be through a CDN.            
+
+#### What is a CDN
+A CDN is a "Content Delivery Network". It's a shared repository of common libraries - in this case .css and .js files. For a minor performance gain you might opt to reference boostrap .css and .js files from a common CDN such as [CDNJS](https://cdnjs.com/libraries/twitter-bootstrap). Te benefit of this is that the resources will be cached by the web browser. This means that ANY web application utilizing the same resources will pull from the browser's cache instead of fetching it. So, if the end-user visisted another site that required the SAME resources first prior to visiting your site the resources would be fetched directly from the browser's cache.
+
+#### Bootstrap Widgets
+Bootstrap generally requires JQuery for it's collection of widgets ( datepicker, accordian, modal, etc...). Combining JQuery and Angular is generally a non-no: It's generally bad to manipulate the DOM directly within an Angualr application. Yes, it can be done - but generally if you don't have to you shouldn't. Fortunatley, there is a fork of of Bootstrap that can be used that does require JQuery : [ngx-bootstrap](https://valor-software.com/ngx-bootstrap/#/)
+
+To install ng-bootstrap run thos: "npm install --save @ng-bootstrap/ng-bootstrap"
+
+Then you need to modify your application module by importing the proper libraries :
+
+    import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+    
+    ...
+    
+    imports: [
+        ...
+        NgbModule  
+    ],    
+    [app.module.ts]    
+
+### 11/12/2018     
+
+#### A Configurable Navigation Bar
+I want to modify my navigation bar based upon the route. Specifically, I only want to display "Add News" in NavigationComponent if TickerContainerComponent has been routed to ( i.e., if the active URL is "details/[msft]" ). Furthermore, the route specified for "Add News" in the NavigationComponent needs to specify the selected ticker symbol, so "details/[msft]/addNews".
+
+If NavigationComponent and TickerContainerComponent had a direct parent/child relationship I could use @input properties to communicate between them. The problem is there is no direct relationship due to the routing. A more robust ( and probably less fragile ) solution is to use a service to share the state between the two components. 
+
+I created a NavigationService to manage the navigation items. The NavigationService is injected into TickerContainerComponent and NavigationComponent. The TickerContainerComponent updates the Service with the selected id ( i.e., ticker ) and the Service in turn updates NavigationComponent.
+ 
+NavigationService :
+'''
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class NavigationService {
+
+  isAddNewsVisible : boolean = false;
+  ticker : string = null;
+
+  constructor() {}
+
+  toggleAddNewsNavItem( show : boolean ) {
+    this.isAddNewsVisible = show;
+  } 
+
+  setTicker( ticker: string) {
+    this.ticker = ticker;
+  }
+}
+'''
+
+NavigationComponent :
+'''
+import { Component, OnInit } from '@angular/core';
+import { NavigationService } from 'src/app/services/navigation.service';
+
+@Component({
+  selector: 'app-navigation',
+  templateUrl: './navigation.component.html',
+  styleUrls: ['./navigation.component.css']
+})
+export class NavigationComponent implements OnInit {
+
+  isCollapsed: boolean = true;
+
+  constructor(public navigationService: NavigationService) {}
+
+  ngOnInit() {}
+}
+'''
+
+NavigationComponent HTML:
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    ...
+      <ul class="navbar-nav mr-auto">    
+        ...
+        <li *ngIf="navigationService.isAddNewsVisible && navigationService.ticker " class="nav-item">
+          <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a>
+        </li>            
+      </ul>
+    </div>
+</nav>
+
+#### Determining the Active Route.
+
+To determine which ticker symbol is selected I use the ActivatedRoute class from the Router Module to "sniff" for the param on the url. This [StackOverflow]((https://stackoverflow.com/questions/45309131/angular-2-4-how-to-get-route-parameters-in-app-component) article was a lot of help!
+
+TicketContainerComponent :
+'''
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { NavigationService } from 'src/app/services/navigation.service';
+
+@Component({
+  selector: 'app-ticker-container',
+  templateUrl: './ticker-container.component.html',
+  styleUrls: ['./ticker-container.component.css']
+})
+export class TickerContainerComponent implements OnInit {
+
+  constructor(private route: ActivatedRoute, private navigationService: NavigationService) {}
+
+  ngOnInit() {
+
+    if (typeof this.route.snapshot.params['id'] != 'undefined') {
+      this.navigationService.toggleAddNewsNavItem(true);
+      this.navigationService.setTicker( this.route.snapshot.params['id']);
+    }
+    else {
+      this.navigationService.toggleAddNewsNavItem(false);
+      this.navigationService.setTicker(null);
+    }
+  }
+}
+'''
 
 # Angular Seed
 

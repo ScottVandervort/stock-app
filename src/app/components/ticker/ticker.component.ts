@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-ticker',
@@ -8,15 +7,8 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class TickerComponent implements OnInit {
 
-  showDetails : boolean;
+  constructor() {}
 
-  constructor(private route: ActivatedRoute) { 
-    this.showDetails = false;
-  }
-
-  ngOnInit() {
-
-    this.showDetails = (typeof this.route.snapshot.params['id'] != 'undefined');
-  }
+  ngOnInit() {}
 
 }
