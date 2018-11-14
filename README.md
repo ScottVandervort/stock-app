@@ -47,7 +47,7 @@ The best thing is that the service appears to be CORS-enabled by default so I ca
 
 #### Generating Typescript classes from JSON
 
-I found a cool tool that generates Typescript classes from JSON. This will come in handy as the JSON returned by https://www.alphavantage.co/ is very poorly formatted ( it's keys have spaces).
+I found a cool [tool](http://json2ts.com/) that generates Typescript classes from JSON. This will come in handy as the JSON returned by https://www.alphavantage.co/ is very poorly formatted ( it's keys have spaces).
 
 ### 11/7/2018
 I added a Routing Module. with the following routes :
@@ -214,20 +214,93 @@ TicketContainerComponent :
     })
     export class TickerContainerComponent implements OnInit {
 
-    constructor(private route: ActivatedRoute, private navigationService: NavigationService) {}
+        constructor(private route: ActivatedRoute, private navigationService: NavigationService) {}
 
-    ngOnInit() {
+        ngOnInit() {
 
-        if (typeof this.route.snapshot.params['id'] != 'undefined') {
-        this.navigationService.toggleAddNewsNavItem(true);
-        this.navigationService.setTicker( this.route.snapshot.params['id']);
-        }
-        else {
-        this.navigationService.toggleAddNewsNavItem(false);
-        this.navigationService.setTicker(null);
+            if (typeof this.route.snapshot.params['id'] != 'undefined') {
+            this.navigationService.toggleAddNewsNavItem(true);
+            this.navigationService.setTicker( this.route.snapshot.params['id']);
+            }
+            else {
+            this.navigationService.toggleAddNewsNavItem(false);
+            this.navigationService.setTicker(null);
+            }
         }
     }
+
+### 11/13/2018     
+
+Today I mocked up the ticker chart in [jsFiddle](http://jsfiddle.net/svandervort/a96n8zyL/). Right now it displays the last few years of Micorosft's stock price.
+
+The fiddle uses the new [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) and [Promise API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) - which both have pretty [good support](https://caniuse.com/#feat=fetch) across the major browsers now. Bonus points to the Fetch API for supporting CORS.
+
+The fiddle fetches data from a free RESTful API offered by [www.alphavantage.co](https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=MSFT&apikey=demo/). The API is CORS-enabled which means it can be accessed directly from your web browser.
+
+The JSON returned by the service is pretty funky. The "keys" have spaces making it impossible to access them using the dot-notation. I ended up reformatting the objects into something a little friend-lier :
+
+    "Monthly Time Series": {
+        "2018-11-14": {
+            "1. open": "107.0500",
+            "2. high": "112.2400",
+            "3. low": "104.4800",
+            "4. close": "105.0000",
+            "5. volume": "307008701"
+        },
+    ...
+
+What they hey! This ain't gonna' work : 
+
+    var closePrice =  "Monthly Time Series"."2018-11-14"."1. open";
+
+Before running the example on jsFiddle however you will need to register yourself at [www.alphavantage.co](https://www.alphavantage.co/) and copy your own key into the fiddle : 
+
+    const apikey='[YOUR_KEY_HERE]';
+
+...if you don't the fiddle will give you a nasty error to go ahead and do so.
+
+#### What Fetch?
+The Fetch API is a native implementation of the XMLHttpRequest that is built into your browser. Prior to this you would need to include an external library such as [JQuery ](http://api.jquery.com/jquery.ajax/). The XMLHttpRequest ( via fetch ) allows you to asynchronoulsy perform an HTTP GET request to pull down "stuff" from your server. Asynchronous is key in that the data can be retreived without refreshing the web page. Without XMLHttpRequest the web page would have to be refreshed - ruining the experience for the end-user. Oh, and the "stuff" returned by XMLHttpRequest isn't tyoically XML - it's JSON. Why? JSON is native-javascript which is easier to work with on the browser. XML woould require a data transformation - into JSON.
+
+#### What is a Promise?
+Fetching data from a service isn't immediate. It is performed more-or-less in a seperate process so that the calling application doesn't have to wait around. The problem is that when the data is (finally) retreived the calling application  needs to do something with it. The old way of doing this was using a "callback" method. The calling application supplies a "callback" method to be invoked upon the completion of the asynchronous method :
+
+With a callback :
+                    
+    function myFunc () {            	
+    
+            setTimeout(myCallback("Hello World"),1000);
     }
+
+    function myCallback (data) {            
+        console.log( data );
+    }
+    
+    myFunc(); // "Hello World".
+
+A better solution is to have the asynchronous method return a Promise - an object. Promises allow chaining and eliminate a lot of the scope/closure issues that callback methods have. 
+
+With a Promise:
+
+    function myPromiseFunc () {            
+            return new Promise((resolve, reject) => {  
+            setTimeout(resolve("Hello World"),1000)
+            })
+    }
+    
+    myPromiseFunc().then( res => console.log( res )); // "Hello World".
+
+
+#### What is CORS?
+Normally you cannot fetch (GET) data from a different domain. For example, if my website is served from www.scottvandervort.com the web browser on which it is running will not let it fetch data from www.dataservices.com. The web browser will only let a web application fetch from the domain upon which it was served - so www.scottvandervort.com. CORS solves this problem. The Fetch API allows you to specify CORS in the HTTP Request Header. If the service running on www.dataservices.com is CORS-enabled as well the web browser will not prevent the data exhchange. And CORS isn't just for fetching data - it also allows other actions as well - POST and HEAD.
+
+Fetch API allows CORS:
+
+    return new Promise((resolve, reject) => {  
+    fetch(	url, { mode: "cors"})
+        .then(function(response) {
+            return response.json();
+        })
 
 
 # Angular Seed
