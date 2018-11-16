@@ -1,3 +1,17 @@
-<p>
-  ticker works!
-</p>
+<table class="table table-striped">
+    <thead class="thead">
+      <tr>
+        <th class="col-md-6">Symbol</th>
+        <th class="col-md-3">Price</th>
+        <th class="col-md-3">Change</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let quote of stockQuotes">
+          <td>{{quote.symbol}}</td>
+          <td>{{quote.price}}</td>
+          <td>{{quote.change}}</td>
+        </tr>
+    </tbody>
+  </table>
+  Last Updated : {{lastUpdated}}

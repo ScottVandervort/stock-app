@@ -302,6 +302,55 @@ Fetch API allows CORS:
             return response.json();
         })
 
+### 11/15/2018
+Today I added the ability to Add Stock Symbols ( TickerAddComponent ) and display them on the "Home" page ( TickerComponent ). TickerAddComponent adds the symbols to local storage using the local storage service ( LocalStorageService ). TickerComponent fetches the symbols from LocalStorageService, displays them, and fetches live stock data from the ticker service ( TickerService ). An interval on TickerComponent polls TickerService at regular intervals to fetch the latest information for each of the stock symbols.
+
+So what can go wrong? Everything? It works - up until the free RESTful blocks my requests. The "free" account only allows up to 5 requests per minute and 500 total requests per day. In addition every time I navigate from the "Home" page ( TickerAddComponent ) to the "Add Symbols" page ( TickerAddComponent) the stock quotes get lost. Tomorrow I'll look into throttling the requests to the RESTful service and caching the data in TickerService. In Angular services are singletons and a great place for preserving state. 
+
+#### Disposing of Interval
+I am using an interval to make re-occurring requests to the REST service. It is very important to dipose of intervals and timeouts when you are done with them. If you don't the object will persist in memory as long as the page is displayed in the web browser. This will cause a slow memory leak. For web pages that persist for hours, days, or even weeks this leak could quickly become a flood. Fortunatley, Angular Components have a "dispose" method which is a perfect place to perform such housekeeping :
+
+    StockLookupInterval : number = 1000;
+    intervalHandle : any;
+
+    ngOnInit() {
+        // Save a handle to the interval ...
+        this.intervalHandle = setInterval( interval => {      
+                this.lookupStockSymbols();
+            }, 
+            StockLookupInterval);
+    }
+
+    ngOnDestroy() {
+        // ... and clear it when you are done.
+        clearInterval(this.intervalHandle);
+    }    
+
+
+#### Bootstrapping
+The best practice for the Bootstrap Grid Layout is to wrap the entire application in a Bootstrap Container like so :
+
+    <app-navigation></app-navigation>
+    <div class="container">
+        <router-outlet></router-outlet>
+    <div class="container">
+
+I kept the navigation component outside of the container so that it spans the whole width of the page. Then each component will exist as a combination of row's and columns in the Container. Here is the markup for adding stock symbols ( TickerAddComponent ). Everything exists in a single row of the Bootstrap Comtainer. However, the number of columns each of the elements span varies based upon the viewport ( col-md-8, col-sm-12, etc...). "md" and "sm" correspond to medium and small viewports respectively  :
+
+    <div class="row">
+
+        <ul class="list-group col-md-8 col-sm-12">
+            <li *ngFor="let stockSymbol of stockSymbols" class="list-group-item">{{stockSymbol}}</li>
+        </ul>  
+        <form (ngSubmit)="onSubmit()" class="col-md-4 col-sm-12">
+            <div class="form-group">
+            <label for="stockSymbol">Stock Symbol</label>
+            <input type="text" class="form-control" id="stockSymbol" name="stockSymbol" placeholder="Enter stock symbol"  [(ngModel)]="addedSymbol">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+    </div>
 
 # Angular Seed
 

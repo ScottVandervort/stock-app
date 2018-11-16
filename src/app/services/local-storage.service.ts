@@ -12,13 +12,6 @@ export class LocalStorageService {
 
   constructor() { 
     this.storageEnabled = this.storageAvailable('localStorage');
-
-    
-    let mock = [  new Symbol('msft', ['This happened', '...and then this', '...and finally this']),
-              new Symbol('qcom', ['First I turned on the oven', '...then I mixed the ingredients', '...and finally I ate the cookie'])];
-
-    if (this.storageEnabled)
-      localStorage.setItem(LocalStorageDataName, JSON.stringify(mock));
   }
 
   addSymbol ( symbol: string ) {
@@ -37,12 +30,13 @@ export class LocalStorageService {
 
     symbol = symbol.trim().toUpperCase();
 
-    data = JSON.parse(localStorage.getItem(LocalStorageDataName));
+    data = JSON.parse(localStorage.getItem(LocalStorageDataName)) || [];
 
-    for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) {
-      if (data[symbolIndex].symbol.toUpperCase().trim() == symbol) 
-        return; // Ticker Symbol already exists. Throw exception?
-    }
+    if (data!= null) 
+      for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) {
+        if (data[symbolIndex].symbol.toUpperCase().trim() == symbol) 
+          return; // Ticker Symbol already exists. Throw exception?
+      }
 
     data.push ( new Symbol(symbol, []) )
 
@@ -63,12 +57,13 @@ export class LocalStorageService {
     if (!this.storageEnabled) 
       return; // Storage is not supported. Throw exception?
 
-    let data : Symbol [];
+    let data : Symbol [] = [];
 
     symbol = symbol.trim().toUpperCase();
 
-    data = JSON.parse(localStorage.getItem(LocalStorageDataName));
+    data = JSON.parse(localStorage.getItem(LocalStorageDataName)) || [];
 
+    if (data!= null)     
     for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) {
       if (data[symbolIndex].symbol.toUpperCase().trim() == symbol)  {
         data[symbolIndex].news.push(news);
@@ -77,18 +72,19 @@ export class LocalStorageService {
     }
   }  
 
-  getSymbols () : String[] {
+  getSymbols () : string[] {
 
     if (!this.storageEnabled) 
       return []; // Storage is not supported.
 
     let data : Symbol [];
-    let result : String [] = [];
+    let result : string [] = [];
       
     data = JSON.parse(localStorage.getItem(LocalStorageDataName));
 
-    for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) 
-      result.push(data[symbolIndex].symbol);
+    if (data != null)
+      for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) 
+        result.push(data[symbolIndex].symbol);
 
     return result;
   }

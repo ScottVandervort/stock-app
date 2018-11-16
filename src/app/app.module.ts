@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http'; // Required for AJAX ( fetches ).
+import { FormsModule } from '@angular/forms'; // Required for Forms.
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -34,7 +35,8 @@ import { NavigationComponent } from './components/navigation/navigation.componen
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,
-    NgbModule  
+    NgbModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
