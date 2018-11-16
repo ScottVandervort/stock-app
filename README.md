@@ -307,7 +307,7 @@ Today I added the ability to Add Stock Symbols ( TickerAddComponent ) and displa
 
 So what can go wrong? Everything!
 
-It works - up until the free RESTful blocks my requests. The "free" account only allows up to 5 requests per minute and 500 total requests per day. In addition every time I navigate from the "Home" page ( TickerAddComponent ) to the "Add Symbols" page ( TickerAddComponent) the stock quotes get lost. Tomorrow I'll look into throttling the requests to the RESTful service and caching the data in TickerService. In Angular services are singletons and a great place for preserving state. 
+It works - up until the free RESTful blocks my requests. The "free" account only allows up to 5 requests per minute and 500 total requests per day. In addition, every time I navigate from the "Home" page ( TickerAddComponent ) to the "Add Symbols" page ( TickerAddComponent) the stock quotes get lost. Tomorrow I'll look into throttling the requests to the RESTful service and caching the data in TickerService. In Angular services are singletons and a great place for preserving state. 
 
 #### Disposing of Interval
 I am using an interval to make re-occurring requests to the REST service. It is very important to dipose of intervals and timeouts when you are done with them. If you don't the object will persist in memory as long as the page is displayed in the web browser. This will cause a slow memory leak. For web pages that persist for hours, days, or even weeks this leak could quickly become a flood. Fortunatley, Angular Components have a "dispose" method which is a perfect place to perform such housekeeping :
