@@ -3,8 +3,7 @@ import { LocalStorageService } from '../../services/local-storage.service';
 import { TickerService } from '../../services/ticker.service';
 import { Quote } from '../../models/quote';
 
-const StockLookupInterval : number = 3600000; // 1 hour.
-const IndividualStockDelay : number = 5000;   // 5 seconds. 
+const PortfolioLookupInterval : number = 10000; // 10 seconds.
 
 @Component({
   selector: 'app-ticker',
@@ -13,9 +12,9 @@ const IndividualStockDelay : number = 5000;   // 5 seconds.
 })
 export class TickerComponent implements OnInit, OnDestroy {
 
-  stockSymbols : string [] = [];
-  stockQuotes : Quote [] = [];
-  intervalHandle : any;
+  symbols : string [] = [];
+  quotes : Quote [] = [];
+  portfolioIntervalHandle : any;
   lastUpdated : Date;
   
   constructor(private tickerService : TickerService, private localStorageService : LocalStorageService) {}
@@ -24,47 +23,49 @@ export class TickerComponent implements OnInit, OnDestroy {
 
     this.init();
 
-    this.intervalHandle = setInterval( interval => {      
+    // Periodically get new quotes for the stock symbols.
+    this.portfolioIntervalHandle = setInterval( interval => {      
       this.lookupStockSymbols();
     }, 
-    StockLookupInterval);
+    PortfolioLookupInterval);
   }
 
   ngOnDestroy() {
-      clearInterval(this.intervalHandle);
+      clearInterval(this.portfolioIntervalHandle);
   }
 
   private init () {
-    this.stockSymbols = this.localStorageService.getSymbols();   
+
+    // Get all stock symbols in the user's portfolio...
+    this.symbols = this.localStorageService.getSymbols();   
     
-    this.stockSymbols.forEach( symbol => {  
-      this.stockQuotes.push( new Quote(symbol,null,null,null,null,null,null,null,null,null))      
+    // ... and initialize empty quotes for them ( they will be periodically refreshed with real data ).
+    this.symbols.forEach( symbol => {  
+      this.quotes.push( new Quote(symbol,0,0,0,0,0,"N/A",0,0,0))      
     });
 
     this.lookupStockSymbols();    
   }
 
+  // Gets quotes for each of the stock symbols.
   private lookupStockSymbols () {
 
-    // TODO : STock symbols and quotes need to be looked up and cached in the TickerService. That way the data can shared ( the logic here will be simplified as well ).
+    this.symbols.forEach( symbol => {      
+      
+      this.tickerService.getQuote(symbol).subscribe( 
+        newQuote => {
+  
+          let oldQuote = this.quotes.find( quote => quote.symbol == newQuote.symbol);
+        
+          if (typeof oldQuote != 'undefined') {    
+            oldQuote.change = newQuote.change;
+            oldQuote.price = newQuote.change;                     
+          }
+                      
+          this.lastUpdated = new Date();          
 
-    this.stockSymbols.forEach( symbol => {      
-
-      setTimeout(timeout => {
-        this.tickerService.getQuote(symbol).subscribe( newQuote => {
-          
-          this.stockQuotes.forEach( oldQuote => {
-            if (oldQuote.symbol == newQuote.symbol) {
-              oldQuote.change = newQuote.change;
-              oldQuote.price = newQuote.change;              
-            }
-          });
-
-        })
-      },
-      IndividualStockDelay);
-    })    
-
-    this.lastUpdated = new Date();
+        }
+      )
+    })
   }
 }

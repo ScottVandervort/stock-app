@@ -354,6 +354,86 @@ I kept the navigation component outside of the container so that it spans the wh
 
     </div>
 
+### 11/16/2018
+
+The TickerService now caches any stock quotes that it fetches from the REST service. As I mentioned previously, the "free" REST service I am using puts some pretty rigid restrictions on how often you can consume their endpoints. I created modified getQuote() on the TickerService so that it returns an Observable object. If a quote exists in the cache I immediately resolve it - otherwise it's resolved asynchronously through an actual call to the REST service. getQuote() in TickerService looks something like this:
+
+    public getQuote(symbol: string ) : Observable<Quote> {
+        ...
+        let observable : Observable<Quote>;
+        ...
+
+I call the REST service if the quote DOES NOT exist in the cache :
+
+    observable = this.getQuoteFromRESTService(symbol);
+      
+    observable.subscribe( 
+        newQuote => {
+          this.quotes.push(newQuote);
+        }, 
+        error => {          
+          console.error("Error when looking up quote for " + symbol + ". Error: " + error);   
+        });
+
+      return observable;
+
+Or, the quote DOES exist I immediately resolve the Observable.
+
+#### Imediately resolving an Observable
+
+Observables are meant to be resolved asynchronously - generally they are used to fetch data from a service. However, if you need to immediately 
+resolve an Observable you can do so like this :
+
+    observable = Observable.create(function (observer) {
+        observer.next(quote);
+        observer.complete();
+    });
+
+    return observable;
+
+The consumer of the service, TickerComponent looks like this :
+
+ this.tickerService.getQuote(symbol).subscribe( 
+        newQuote => {
+            /* DO something with quote */
+        }
+#### Observable versus Promise
+
+observable.next(...) "resolves" the subscriber with the requested data. In this case TickerService sends TickerComponent a new quote,
+
+observable.next(...) can be called multiple times in TickerService. Each time it is invoked TickerComponent is notified with a quote. 
+
+This is a big difference between Promises and Observables. Promises can only be resolved once while Observables can be resolved multiple times - until .complete() is invoked. 
+
+For now I am using Observable like a Promise. The TickerService fetches the quote once, resolves ( i.e., .next() ) it, and immediately .complete()'s it. However, for an application such as this where I want to continuously grab quotes I could modify the service to NOT .complete() and periodically invoke .next(). TickerComponent would keep receiving the latest quotes from TickerService using the same Observable object. Pretty cool, right? Something to ponder for a future enhancement.
+
+#### Initializing and Disposing of Services
+
+Angular supports [lifecycle hooks](https://angular.io/guide/lifecycle-hooks) for it's Components and Services. The most common are Init() and Destroy(). Services are hampered in that they do not support Init(). For TickerService I want to set up an interval to periodically fetch quotes. Without an Init() I'm forced to use the next best thing - the constructor:
+
+    import { OnDestroy } from '@angular/core';
+
+    @Injectable({
+    providedIn: 'root'
+    })
+    export class TickerService implements OnDestroy {
+
+        private portfolioIntervalHandle : any;
+
+        constructor( private http: HttpClient ) { 
+
+            ... 
+
+            this.portfolioIntervalHandle = setInterval( /* Fetch QUotes from RESTful Service */, 
+                                                        5000); 
+    }
+
+Don't forget to dispose of the interval in Destroy() - which IS supported :
+
+  ngOnDestroy() {
+    clearInterval(this.portfolioIntervalHandle);
+  }  
+
 # Angular Seed
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.4.
