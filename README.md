@@ -512,25 +512,25 @@ The following code is from the TickerService. It will keep attempting to fetch d
 
     ...
 
-    return this.http.get<HistoricalQuote[]>(url).pipe(
-      map( res => {
+        return this.http.get<HistoricalQuote[]>(url).pipe(
+        map( res => {
 
-        if (typeof res["Note"] != 'undefined' ) {     
-          throw res["Note"];  // This will be picked up by retryWhen() ...
-        }
-        else {
+            if (typeof res["Note"] != 'undefined' ) {     
+            throw res["Note"];  // This will be picked up by retryWhen() ...
+            }
+            else {
+                ...
+            }
+
             ...
-        }
-
-        ...
-      }),
-      retryWhen(errors =>
-        errors.pipe(
-          delayWhen(val => timer(10000))
+        }),
+        retryWhen(errors =>
+            errors.pipe(
+            delayWhen(val => timer(10000))
+            )
         )
-      )
-  );     
-  }  
+        );     
+    }  
 
 #### Styling the Chart 
 So, I dutifully added some basic styles to the ChartComponent and ... nothing happened. The D3.js chart was still ugly and bland. After reading this article on [Stack Overflow](https://stackoverflow.com/questions/36214546/styles-in-component-for-d3-js-do-not-show-in-angular-2/36214723#36214723) I realized it had everything to do with the dynamic nature of how the chart is generated. Angular re-writes a components' styles to have them only applied to the elements contained within the component. Since the chart rendered by D3.js is generated asynchronously Angular never gets a chance to re-write the styles and as such they never get applied. There are two ways to fix this : include a global style sheet or, turn off the "ViewEncapsualtion" feature for the Component. Turning off "ViewEncapsulation" stops Angular from re-writting the styles. A global stylesheet has the same effect by making the styles ... global:
