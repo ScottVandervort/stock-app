@@ -59,7 +59,7 @@ export class TickerComponent implements OnInit, OnDestroy {
         
           if (typeof oldQuote != 'undefined') {    
             oldQuote.change = newQuote.change;
-            oldQuote.price = newQuote.change;                     
+            oldQuote.price = newQuote.price;                     
           }
                       
           this.lastUpdated = new Date();          

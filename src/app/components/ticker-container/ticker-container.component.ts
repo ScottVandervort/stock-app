@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit  } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NavigationService } from 'src/app/services/navigation.service';
 
@@ -9,17 +9,24 @@ import { NavigationService } from 'src/app/services/navigation.service';
 })
 export class TickerContainerComponent implements OnInit {
 
+  ticker : string;
+
   constructor(private route: ActivatedRoute, private navigationService: NavigationService) {}
 
   ngOnInit() {
 
     if (typeof this.route.snapshot.params['id'] != 'undefined') {
       this.navigationService.toggleAddNewsNavItem(true);
-      this.navigationService.setTicker( this.route.snapshot.params['id']);
+
+      this.ticker = this.route.snapshot.params['id'];
+      this.navigationService.setTicker(this.ticker);
+
     }
     else {
       this.navigationService.toggleAddNewsNavItem(false);
-      this.navigationService.setTicker(null);
+
+      this.ticker = null;
+      this.navigationService.setTicker(this.ticker);
     }
   }
 

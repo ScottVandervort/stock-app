@@ -434,6 +434,131 @@ Don't forget to dispose of the interval in Destroy() - which IS supported :
     clearInterval(this.portfolioIntervalHandle);
   }  
 
+### 11/19/2018 
+The D3.js chart is now displayed when clicking on a Stock Symbol on the "Home" page. Clicking "Home" routes to the TickerContainerComponent - which hosts the TickerChartComponent, the TickerDetailComponent, and the TickerNewsComponent. 
+
+#### Navigation ( with an Argument ) through RouterLink
+In TickerComponent I display all of the stocks in the users' portfolio. Clicking on a stock symbol leverages the router to navigate to the "Details" page for the stock. To do this you use the Angular "routerLink". The path I want to route to needs to contains the stock symbol as well, so : "/details/msft" for say, Microsoft. This is how you would do that:
+
+    <tr *ngFor="let quote of quotes">
+        <td><a [routerLink]="['/details', quote.symbol]">{{quote.symbol}}</a></td>
+        ...
+    </tr>
+
+#### Installing D3.js 
+As the chart uses D3.js - you need to include it with your application. Run the following to include the library as well as it's type declarations in the application's package.json.
+
+    npm install --save d3
+    npm install --save-dev @types/d3
+
+npm installs the latest version of D3.js. The fiddle that I originally created used v3 of the library. This immediately broke the chart. Fortunately, D3.js has lots and lots of examples to pull from. I was able to find a similar chart using the [latest version of the framework here](https://bl.ocks.org/d3noob/402dd382a51a4f6eea487f9a35566de0).
+
+#### What is a Type Library
+D3.js and many other libraries extend Javascript with syntax that the Typescript compiler does not understand. If Typescript doesn't understand it - it will throw an error. Communities oftentimes create type declaration files to complement the core libraries. These type declaration files "tell" the Typescript compiler how to handle the core library's extensions.
+
+I created a new method on TickerService to return historical quotes from the [Financial REST service ](https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=MSFT&apikey=demo). As historical quotes generally don't change ( they're historical, right? ) I fetch the data once - and then cache it for subsequent calls. This is different from live quotes which need to be refreshed periodically. 
+
+#### A Historical Quote Class
+I created a new HistoricalQuote class to store the data retrieved from the service. The historical data is stored as an array of these objects :
+
+    export class HistoricalQuote {
+        
+        constructor ( symbol: string, date: string, price: number ) {
+            this.symbol = symbol;
+            this.date = date;
+            this.price = price;
+        }
+
+        symbol: string;
+        date: string;
+        price: number;
+    }
+
+#### Caching using a Typescript Map
+Typescript compiles down to native Javascript - but it offers some cool data structures which make it a lot like Java, C#, and other strongly-typed languages. I didn't like it at first - but it's definitely growing on me. Behold! A strongly typed Map that I used to store the Historical Quotesin the TickerService :
+
+    private historicalQuotes : Map<string, HistoricalQuote[]> = new Map();
+
+FYI: The "string" (or, key) is the stock symbol.
+
+Unfortunately, D3.js has issues with strongly-typed data in it's nodes. I had to transform the Historical Quotes into POJO's ( Plain-Old-JSON-Object) in order to get D3.js to play nicely with the data.
+
+  private showChart( historicalQuotes : HistoricalQuote[] ) {
+
+    var data = [];    
+
+    historicalQuotes.forEach( historicalQuote => {
+      data.push({"date" : historicalQuote.date, "close" : historicalQuote.price });
+    })
+    ...
+
+The data now looks like this :
+
+    [	{ date: "1998-02-27", close: "84.7500" },
+        { date: "1998-03-31", close: "89.5000" },
+    	  ...
+    ]
+
+#### Re-trying an Observable
+Okay, so the limitations and restrictions of the Financial Service are really annoying. I've tried caching. I've tried throttling. What I REALLY need is a way to re-run the query until I get the data I want back. The good news is that RxJs - the library that Angular uses for Observables supports this [natively](https://www.learnrxjs.io/operators/error_handling/retrywhen.html) by using retryWhen() and delayWhen(). 
+
+The following code is from the TickerService. It will keep attempting to fetch data from the url every 10 seconds. When data is finally returned does the Observable will complete. Throwing an exception will trigger - or an explicit error from http.get() will trigger the retryWhen() block.
+
+    import { HttpClient } from '@angular/common/http';
+    import { Observable } from 'rxjs';
+    import { HistoricalQuote } from '../models/historical-quote';
+    import { timer } from 'rxjs';
+    import { map, retryWhen, delayWhen } from 'rxjs/operators';
+
+    ...
+
+    return this.http.get<HistoricalQuote[]>(url).pipe(
+      map( res => {
+
+        if (typeof res["Note"] != 'undefined' ) {     
+          throw res["Note"];  // This will be picked up by retryWhen() ...
+        }
+        else {
+            ...
+        }
+
+        ...
+      }),
+      retryWhen(errors =>
+        errors.pipe(
+          delayWhen(val => timer(10000))
+        )
+      )
+  );     
+  }  
+
+#### Styling the Chart 
+So, I dutifully added some basic styles to the ChartComponent and ... nothing happened. The D3.js chart was still ugly and bland. After reading this article on [Stack Overflow](https://stackoverflow.com/questions/36214546/styles-in-component-for-d3-js-do-not-show-in-angular-2/36214723#36214723) I realized it had everything to do with the dynamic nature of how the chart is generated. Angular re-writes a components' styles to have them only applied to the elements contained within the component. Since the chart rendered by D3.js is generated asynchronously Angular never gets a chance to re-write the styles and as such they never get applied. There are two ways to fix this : include a global style sheet or, turn off the "ViewEncapsualtion" feature for the Component. Turning off "ViewEncapsulation" stops Angular from re-writting the styles. A global stylesheet has the same effect by making the styles ... global:
+
+    import { Component, ViewEncapsulation } from '@angular/core';
+
+    ...
+
+    @Component({
+    encapsulation: ViewEncapsulation.None,  
+    selector: 'app-ticker-chart',
+    templateUrl: './ticker-chart.component.html',
+    styleUrls: ['./ticker-chart.component.css']
+    })
+    export class TickerChartComponent {
+        ...
+
+That's it for now. Still to come: 
+
+1. Fleshing out the stock "Details" Page - I still need to display the Stock Details and News.
+
+2. Add the Ability to Add News for a Stock.
+
+3. I'd like to flesh out some more unit tests. Ideally I should have been writting them first ( Hello? Test-Driven-Development ) but I didn't so now it's time to pay the piper...
+
+4. I would like the "Add News/Symbols" pages to appear as Modal Dialogs on the "Home" and "Details" pages. 
+
+
 # Angular Seed
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.4.

@@ -2,12 +2,15 @@ import { OnDestroy } from '@angular/core';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from "rxjs/operators";
 import { environment } from 'src/environments/environment';
 import { Quote } from '../models/quote';
+import { HistoricalQuote } from '../models/historical-quote';
+import { timer } from 'rxjs';
+import { map, retryWhen, delayWhen } from 'rxjs/operators';
 
 const PortfolioLookupInterval : number = 600000; // 10 minutes.
 const QuoteLookupInterval : number = 30000;   // 30 seconds. 
+const QueryRetryInterval : number = 30000;  // 30 seconds.
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +23,7 @@ export class TickerService implements OnDestroy {
 
   // This is a cache of quotes.
   private quotes : Quote[] = [];
+  private historicalQuotes : Map<string, HistoricalQuote[]> = new Map();
 
   constructor( private http: HttpClient ) { 
 
@@ -32,6 +36,46 @@ export class TickerService implements OnDestroy {
     clearInterval(this.quoteIntervalHandle);
     clearInterval(this.portfolioIntervalHandle);
   }  
+
+  public getHistoricalQuote(symbol: string) : Observable<HistoricalQuote[]> {
+
+    // Does a historical quote for the symbol exist in the cache?
+    let historicalQuote : HistoricalQuote = this.historicalQuotes[symbol];
+    let observable : Observable<HistoricalQuote[]>;
+
+    if (typeof historicalQuote == 'undefined') {
+
+      // Nope. Fetch a historical quote for the symbol from the REST service ...
+
+      console.info(symbol + " does NOT exist in historical quote cache!");
+
+      observable = this.getHistoricalQuoteFromRESTService(symbol);
+      
+      observable.subscribe( 
+        newQuote => {
+          this.historicalQuotes.set(symbol,newQuote);
+        }, 
+        error => {          
+          console.error("Error when looking up historical quote for " + symbol + ". Error: " + error);   
+        });
+
+      return observable;
+    }
+    else {
+
+      // Yup. Immediately resolve with the cahced quote ...
+
+      console.info(symbol + " DOES exist in historical quote cache!");      
+
+      observable = Observable.create(function (observer) {
+        observer.next(historicalQuote);
+        observer.complete();
+      });
+    }
+
+    return observable;
+  }
+
 
   // Gets a quote for the specified symbol.
   public getQuote(symbol: string ) : Observable<Quote> {
@@ -129,13 +173,14 @@ export class TickerService implements OnDestroy {
     
     let url = environment.tickerServiceUrl + "query?function=GLOBAL_QUOTE&symbol=" + ticker + "&apikey=" + environment.tickerServiceApiKey;
 
-    return this.http.get<Quote>(url).pipe(map( res =>
-      {
+    return this.http.get<Quote>(url).pipe(
+      map( res => {
         let result : Quote;
         
-        if (typeof res["Note"] != 'undefined' ) {          
+        if (typeof res["Note"] != 'undefined' ) {     
+          // The REST service has restrictions imposed on "free" accounts. We've reached the maximum number of queries allowable.                   
           console.error(res["Note"]);
-          throw res["Note"];  
+          throw res["Note"];  // This will be picked up by retryWhen() ...
         }
         else {
           result = new Quote(
@@ -153,8 +198,47 @@ export class TickerService implements OnDestroy {
         }
 
         return result;
-      }));
-    
-    
+      }),
+      retryWhen(errors =>
+        errors.pipe(
+          // Retry the query again in a little bit ...
+          delayWhen(val => timer(QueryRetryInterval))
+        )
+      )            
+    )
   }
+
+  private getHistoricalQuoteFromRESTService (ticker: string) : Observable<HistoricalQuote[]> {
+    
+    let url = environment.tickerServiceUrl + "query?function=TIME_SERIES_MONTHLY&symbol=" + ticker + "&apikey=" + environment.tickerServiceApiKey;
+
+    return this.http.get<HistoricalQuote[]>(url).pipe(
+      map( res => {
+
+        let result : HistoricalQuote[] = [];
+        
+        if (typeof res["Note"] != 'undefined' ) {     
+          // The REST service has restrictions imposed on "free" accounts. We've reached the maximum number of queries allowable.               
+          console.error(res["Note"]);
+          throw res["Note"];  // This will be picked up by retryWhen() ...
+        }
+        else {
+          // The data returned by the REST service returns a JSON object whereas the keys correspond to dates 
+          // and the value is the quote. Need to massage into HistoricalQuote obects ...
+          // https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=MSFT&apikey=demo
+          for (const [date, quoteInfo] of Object.entries(res["Monthly Time Series"])) {
+            result.push( new HistoricalQuote (ticker, date, quoteInfo["4. close"]));
+          }
+        }
+
+        return result;
+      }),
+      retryWhen(errors =>
+        errors.pipe(
+          // Retry the query again in a little bit ...
+          delayWhen(val => timer(QueryRetryInterval))
+        )
+      )
+  );     
+  }  
 }
