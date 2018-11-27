@@ -1,3 +1,19 @@
-<p>
-  ticker-news-add works!
-</p>
+<div class="row">
+
+  <div *ngIf="!allTickerNews || allTickerNews.length <= 0" class="col-md-8 col-sm-12 align-self-center">
+    No News ( yet! )
+  </div>  
+
+  <ul *ngIf="allTickerNews && allTickerNews.length > 0" class="list-group col-md-8 col-sm-12">
+    <li *ngFor="let tickerNews of allTickerNews" class="list-group-item">{{tickerNews}}</li>
+  </ul>  
+  
+  <form (ngSubmit)="onSubmit()" class="col-md-4 col-sm-12">
+    <div class="form-group">
+      <label for="tickerNews">Stock News</label>
+      <textarea class="form-control" id="stockNews" name="stockNews" placeholder="Enter stock news"  [(ngModel)]="addedNews"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+
+</div>

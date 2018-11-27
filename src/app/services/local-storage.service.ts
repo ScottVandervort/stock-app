@@ -1,5 +1,7 @@
+import { SecurityContext } from '@angular/core';
 import { Injectable } from '@angular/core';
 import { Symbol } from '../models/symbol';
+import { DomSanitizer } from '@angular/platform-browser';
 
 const LocalStorageDataName : string = 'stock-app-data';
 
@@ -10,25 +12,26 @@ export class LocalStorageService {
 
   storageEnabled : boolean = false;
 
-  constructor() { 
+  constructor(private sanitizer : DomSanitizer) { 
     this.storageEnabled = this.storageAvailable('localStorage');
   }
 
   addSymbol ( symbol: string ) {
 
     // TODO : Validate symbol against service.
-    // TODO : HTMLEnode / Scrub service.
     // TODO : Sort symbols prior to storing?
 
     if ((typeof symbol == 'undefined') || (symbol == null) || symbol.trim() == '')
       return; // Symbol is invalid. Throw exception?
 
     if (!this.storageEnabled) 
-      return; // Storage is not supported. Throw exception?
+      return; // Storage is not supported. Throw exception?      
 
     let data : Symbol [];
 
+    // Scrub input for javascript and/or HTML ...
     symbol = symbol.trim().toUpperCase();
+    symbol = this.sanitizer.sanitize(SecurityContext.HTML,symbol);    
 
     data = JSON.parse(localStorage.getItem(LocalStorageDataName)) || [];
 
@@ -46,7 +49,6 @@ export class LocalStorageService {
   addNews ( symbol: string, news: string )  {
 
     // TODO : Validate symbol against service.
-    // TODO : HTMLEnode / Scrub service.
 
     if ((typeof symbol == 'undefined') || (symbol == null) || symbol.trim() == '')
       return; // Symbol is invalid. Throw exception?
@@ -59,17 +61,22 @@ export class LocalStorageService {
 
     let data : Symbol [] = [];
 
+    // Scrub input for javascript and/or HTML ...
     symbol = symbol.trim().toUpperCase();
+    symbol = this.sanitizer.sanitize(SecurityContext.HTML,symbol);    
+    
+    news = this.sanitizer.sanitize(SecurityContext.HTML,news);    
 
     data = JSON.parse(localStorage.getItem(LocalStorageDataName)) || [];
 
     if (data!= null)     
-    for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) {
-      if (data[symbolIndex].symbol.toUpperCase().trim() == symbol)  {
-        data[symbolIndex].news.push(news);
-        break;
-      }       
-    }
+      for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) 
+        if (data[symbolIndex].symbol.toUpperCase().trim() == symbol)  {
+          data[symbolIndex].news.push(news);
+          break;
+        }       
+    
+    localStorage.setItem(LocalStorageDataName, JSON.stringify(data));
   }  
 
   getSymbols () : string[] {
@@ -99,19 +106,22 @@ export class LocalStorageService {
     if (!this.storageEnabled) 
       return; // Storage is not supported. Throw exception?    
 
+    symbol = symbol.trim().toUpperCase();
+
     let data : Symbol [];
     let result : String [];
     
     data = JSON.parse(localStorage.getItem(LocalStorageDataName));
 
-    for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) 
+    for (let symbolIndex=0;symbolIndex<data.length;symbolIndex++) {
+
       if ( data[symbolIndex].symbol == symbol) {
         result = data[symbolIndex].news;
         break;
       }
+    }
 
     return result;    
-
   }
 
   clearStorage () {

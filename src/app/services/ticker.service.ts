@@ -193,7 +193,7 @@ export class TickerService implements OnDestroy {
             res["Global Quote"]["07. latest trading day"],
             res["Global Quote"]["08. previous close"],
             res["Global Quote"]["09. change"],
-            res["Global Quote"]["08. change percent"]
+            res["Global Quote"]["10. change percent"]
           )
         }
 

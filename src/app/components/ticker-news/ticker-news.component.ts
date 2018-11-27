@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { LocalStorageService } from '../../services/local-storage.service';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-ticker-news',
@@ -7,9 +9,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class TickerNewsComponent implements OnInit {
 
-  constructor() { }
+  constructor(private navigationService : NavigationService, private localStorageService : LocalStorageService) { }
+
+  private allNews : String [];
 
   ngOnInit() {
+    let symbol = this.navigationService.ticker;
+
+    this.allNews = this.localStorageService.getNews(symbol);
   }
 
 }

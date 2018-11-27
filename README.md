@@ -554,10 +554,46 @@ That's it for now. Still to come:
 
 2. Add the Ability to Add News for a Stock.
 
-3. I'd like to flesh out some more unit tests. Ideally I should have been writting them first ( Hello? Test-Driven-Development ) but I didn't so now it's time to pay the piper...
+3. I would like the "Add News/Symbols" pages to appear as Modal Dialogs on the "Home" and "Details" pages. 
 
-4. I would like the "Add News/Symbols" pages to appear as Modal Dialogs on the "Home" and "Details" pages. 
+4. The user really needs the ability to delete stock symbols and news from their portfolio. 
 
+5. Rather than display a empty chart and/or "N/A" for a stock I'd really like to present a loading indicator of sorts.
+
+6. The layout isn't very responsive ( yet ). I'd like make it look equally nice on smaller viewports.
+
+7. I'd like to flesh out some more unit tests. Ideally I should have been writting them first ( Hello? Test-Driven-Development ) but I didn't so now it's time to pay the piper...
+
+### 11/26/2018 
+
+I finished fleshing out the TickerDetailsComponent so that when you view a stock you can see a whole bunch of cool information about it. I also added the ability to add ( TickerNewsAddComponent ) and view ( TickerNewsComponent ) news articles for a selected stock symbol.
+
+#### Input Sanitation
+User input begs the question of input sanitization. Angular automatically encodes anything rendered to HTML. It does not scrub input, however. This means that although I don't have to worry about Angular rendering say, a <script/> tag that a devious user might have hidden away in a news article that they posted - it does not prevent the <script/> from getting saved to the data store. Fortunately, Angular does provide the means to properly scrub input using the [DomSanitizer](https://angular.io/api/platform-browser/DomSanitizer). I decided to perform santitation at the service level rather than directly in the component simply to centralize it in one place. It looks like this
+
+    import { SecurityContext } from '@angular/core';
+    import { DomSanitizer } from '@angular/platform-browser';
+
+    ...
+
+    @Injectable({
+    providedIn: 'root'
+    })
+    export class LocalStorageService {
+
+        constructor(private sanitizer : DomSanitizer) {}
+
+        addNews ( symbol: string, news: string )  {
+            ...
+            symbol = this.sanitizer.sanitize(SecurityContext.HTML,symbol);    
+            news = this.sanitizer.sanitize(SecurityContext.HTML,news);  
+            ...
+        }
+
+        ...
+    }
+
+Next up? Presenting the "Add Symbol" and "Add News" views as Modal Dialogs.
 
 # Angular Seed
 

@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Quote } from 'src/app/models/quote';
+import { TickerService } from '../../services/ticker.service';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-ticker-details',
@@ -7,9 +10,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class TickerDetailsComponent implements OnInit {
 
-  constructor() { }
+  private quoteDetails : Quote;
+
+  constructor(private tickerService : TickerService, private navigationService : NavigationService) { }
 
   ngOnInit() {
+    
+    this.tickerService.getQuote(this.navigationService.ticker).subscribe( res => {     
+      this.quoteDetails = res;
+    })
   }
-
 }

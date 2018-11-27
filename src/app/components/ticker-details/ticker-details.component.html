@@ -1,3 +1,14 @@
-<p>
-  ticker-details works!
-</p>
+<div class="col-12">
+    <div class="row">
+      <div class="col-6">Symbol : {{quoteDetails ? quoteDetails.symbol : 'N/A'}}</div>
+      <div class="col-6">Open : {{quoteDetails ? quoteDetails.open : 'N/A'}}</div>
+      <div class="col-6">High : {{quoteDetails ? quoteDetails.high : 'N/A'}}</div>
+      <div class="col-6">Low : {{quoteDetails ? quoteDetails.low : 'N/A'}}</div>
+      <div class="col-6">Price : {{quoteDetails ? quoteDetails.price : 'N/A'}}</div>
+      <div class="col-6">Volume : {{quoteDetails ? quoteDetails.volume : 'N/A'}}</div>
+      <div class="col-6">Latest Trading Day : {{quoteDetails ? quoteDetails.latestTradingDay : 'N/A'}}</div>
+      <div class="col-6">Previous Close : {{quoteDetails ? quoteDetails.previousClose : 'N/A'}}</div>
+      <div class="col-6">Change : {{quoteDetails ? quoteDetails.change : 'N/A'}}</div>
+      <div class="col-6">Change Percent : {{quoteDetails ? quoteDetails.changePercent : 'N/A'}}</div>    
+    </div>
+</div>
