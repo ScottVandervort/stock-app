@@ -487,21 +487,25 @@ FYI: The "string" (or, key) is the stock symbol.
 
 Unfortunately, D3.js has issues with strongly-typed data in it's nodes. I had to transform the Historical Quotes into POJO's ( Plain-Old-JSON-Object) in order to get D3.js to play nicely with the data.
 
-  private showChart( historicalQuotes : HistoricalQuote[] ) {
+    ```
+    private showChart( historicalQuotes : HistoricalQuote[] ) {
 
-    var data = [];    
+        var data = [];    
 
-    historicalQuotes.forEach( historicalQuote => {
-      data.push({"date" : historicalQuote.date, "close" : historicalQuote.price });
-    })
-    ...
+        historicalQuotes.forEach( historicalQuote => {
+            data.push({"date" : historicalQuote.date, "close" : historicalQuote.price });
+        })
+        ...
+    ```
 
 The data now looks like this :
 
+    ```
     [	{ date: "1998-02-27", close: "84.7500" },
         { date: "1998-03-31", close: "89.5000" },
     	  ...
     ]
+    ```
 
 #### Re-trying an Observable
 Okay, so the limitations and restrictions of the Financial Service are really annoying. I've tried caching. I've tried throttling. What I REALLY need is a way to re-run the query until I get the data I want back. The good news is that RxJs - the library that Angular uses for Observables supports this [natively](https://www.learnrxjs.io/operators/error_handling/retrywhen.html) by using retryWhen() and delayWhen(). 
