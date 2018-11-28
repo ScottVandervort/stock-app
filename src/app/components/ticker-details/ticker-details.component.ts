@@ -10,7 +10,7 @@ import { NavigationService } from '../../services/navigation.service';
 })
 export class TickerDetailsComponent implements OnInit {
 
-  private quoteDetails : Quote;
+  public quoteDetails : Quote;
 
   constructor(private tickerService : TickerService, private navigationService : NavigationService) { }
 

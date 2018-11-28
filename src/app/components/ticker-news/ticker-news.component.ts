@@ -11,7 +11,7 @@ export class TickerNewsComponent implements OnInit {
 
   constructor(private navigationService : NavigationService, private localStorageService : LocalStorageService) { }
 
-  private allNews : String [];
+  public allNews : String [];
 
   ngOnInit() {
     let symbol = this.navigationService.ticker;

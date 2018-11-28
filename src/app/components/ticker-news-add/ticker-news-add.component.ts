@@ -10,9 +10,9 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class TickerNewsAddComponent implements OnInit {
 
-  private allTickerNews : String [] = [];
+  public allTickerNews : String [] = [];
 
-  private addedNews : string;
+  public addedNews : string;
 
   constructor( private localStorageService: LocalStorageService,  private navigationService : NavigationService, public activeModal: NgbActiveModal) { }
 
