@@ -393,10 +393,12 @@ resolve an Observable you can do so like this :
 
 The consumer of the service, TickerComponent looks like this :
 
- this.tickerService.getQuote(symbol).subscribe( 
+    ```
+    this.tickerService.getQuote(symbol).subscribe( 
         newQuote => {
             /* DO something with quote */
         }
+    ```
 #### Observable versus Promise
 
 observable.next(...) "resolves" the subscriber with the requested data. In this case TickerService sends TickerComponent a new quote,
@@ -430,9 +432,11 @@ Angular supports [lifecycle hooks](https://angular.io/guide/lifecycle-hooks) for
 
 Don't forget to dispose of the interval in Destroy() - which IS supported :
 
-  ngOnDestroy() {
-    clearInterval(this.portfolioIntervalHandle);
-  }  
+    ```
+    ngOnDestroy() {
+        clearInterval(this.portfolioIntervalHandle);
+    }  
+    ```
 
 ### 11/19/2018 
 The D3.js chart is now displayed when clicking on a Stock Symbol on the "Home" page. Clicking "Home" routes to the TickerContainerComponent - which hosts the TickerChartComponent, the TickerDetailComponent, and the TickerNewsComponent. 
