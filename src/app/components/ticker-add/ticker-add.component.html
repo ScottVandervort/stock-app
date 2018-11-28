@@ -1,15 +1,20 @@
-<div class="row">
-
-  <ul class="list-group col-md-8 col-sm-12">
+<div class="modal-header">
+  <h4 class="modal-title">Add Symbols</h4>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Dismissed')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <ul class="list-group">
     <li *ngFor="let stockSymbol of stockSymbols" class="list-group-item">{{stockSymbol}}</li>
   </ul>  
-  <form (ngSubmit)="onSubmit()" class="col-md-4 col-sm-12">
+  <form (ngSubmit)="onSubmit()">
     <div class="form-group">
-      <label for="stockSymbol">Stock Symbol</label>
-      <!--TODO: Add validation and type-ahead. -->
       <input type="text" class="form-control" id="stockSymbol" name="stockSymbol" placeholder="Enter stock symbol"  [(ngModel)]="addedSymbol">
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
-
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Closed')">Close</button>
 </div>

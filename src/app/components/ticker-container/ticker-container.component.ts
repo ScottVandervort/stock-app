@@ -16,15 +16,11 @@ export class TickerContainerComponent implements OnInit {
   ngOnInit() {
 
     if (typeof this.route.snapshot.params['id'] != 'undefined') {
-      this.navigationService.toggleAddNewsNavItem(true);
-
       this.ticker = this.route.snapshot.params['id'];
       this.navigationService.setTicker(this.ticker);
 
     }
     else {
-      this.navigationService.toggleAddNewsNavItem(false);
-
       this.ticker = null;
       this.navigationService.setTicker(this.ticker);
     }

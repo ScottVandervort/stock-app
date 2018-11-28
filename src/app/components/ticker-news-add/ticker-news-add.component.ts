@@ -1,7 +1,7 @@
 import { Component, OnInit, SecurityContext } from '@angular/core';
 import { LocalStorageService } from '../../services/local-storage.service';
 import { NavigationService } from '../../services/navigation.service';
-import { DomSanitizer } from '@angular/platform-browser';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-ticker-news-add',
@@ -14,14 +14,13 @@ export class TickerNewsAddComponent implements OnInit {
 
   private addedNews : string;
 
-  constructor( private localStorageService: LocalStorageService,  private navigationService : NavigationService, private sanitizer : DomSanitizer) { }
+  constructor( private localStorageService: LocalStorageService,  private navigationService : NavigationService, public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
     this.allTickerNews = this.localStorageService.getNews(this.navigationService.ticker);
   }
 
   onSubmit() {    
-    let val = this.sanitizer.sanitize(SecurityContext.HTML,this.addedNews);
 
     this.localStorageService.addNews(this.navigationService.ticker,this.addedNews);
     this.allTickerNews = this.localStorageService.getNews(this.navigationService.ticker);

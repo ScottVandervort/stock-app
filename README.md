@@ -112,7 +112,7 @@ Installing Boostrap like this means that the Bootstrap .css will by packaged int
 A CDN is a "Content Delivery Network". It's a shared repository of common libraries - in this case .css and .js files. For a minor performance gain you might opt to reference boostrap .css and .js files from a common CDN such as [CDNJS](https://cdnjs.com/libraries/twitter-bootstrap). Te benefit of this is that the resources will be cached by the web browser. This means that ANY web application utilizing the same resources will pull from the browser's cache instead of fetching it. So, if the end-user visisted another site that required the SAME resources first prior to visiting your site the resources would be fetched directly from the browser's cache.
 
 #### Bootstrap Widgets
-Bootstrap generally requires JQuery for it's collection of widgets ( datepicker, accordian, modal, etc...). Combining JQuery and Angular is generally a non-no: It's generally bad to manipulate the DOM directly within an Angualr application. Yes, it can be done - but generally if you don't have to you shouldn't. Fortunatley, there is a fork of of Bootstrap that can be used that does require JQuery : [ngx-bootstrap](https://valor-software.com/ngx-bootstrap/#/)
+Bootstrap generally requires JQuery for it's collection of widgets ( datepicker, accordian, modal, etc...). Combining JQuery and Angular is generally a non-no: It's generally bad to manipulate the DOM directly within an Angualr application. Yes, it can be done - but generally if you don't have to you shouldn't. Fortunatley, there is a fork of of Bootstrap that can be used that does require JQuery : [ng-bootstrap](https://ng-bootstrap.github.io/)
 
 To install ng-bootstrap run thos: "npm install --save @ng-bootstrap/ng-bootstrap"
 
@@ -594,6 +594,122 @@ User input begs the question of input sanitization. Angular automatically encode
     }
 
 Next up? Presenting the "Add Symbol" and "Add News" views as Modal Dialogs.
+
+### 11/27/2018 
+
+"Add Symbols" and "Add News" are now both modal dialogs or, "pop-ups" as I like to call them. The modal dialogs are implemented using [ng-bootstrap](https://ng-bootstrap.github.io/#/components/modal/examples).
+
+#### Creating a Modal Dialog 
+
+A modal dialog requires a host component as well as a child component. The host component is responsible for invoking the dialog, specifying the child component which should be displayed within the dialog, and ( optionally ) handling any close events when the dialog is closed. 
+
+When perusing the code below be sure to take note of the imports that I have specified in the code snippets as they are required to get this to work correctly.
+
+To make a component display in a modal dialog you will need to do the following :
+
+1. Add the child component that you want to display as a modal dialog  ( TickerAddComponent ) into your AppModule :
+
+    import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+
+    ...
+
+    @NgModule({
+        declarations: [
+            ...
+            TickerAddComponent,
+            ...
+        ],
+        imports: [
+            ...
+            NgbModule,
+            ...
+        ],
+        ...
+        entryComponents: [
+            TickerAddComponent, 
+        ],
+        ...
+    })
+    export class AppModule { }
+
+2. Add a "click" handler to the component that will be hosting the modal dialog ( NavigationComponent ). modalService.open() displays the dialog. Callback methods can be specified as well. These will be invoked when the user closes or dismisses the dialog :
+
+    import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+    import { TickerAddComponent } from '../../components/ticker-add/ticker-add.component';
+
+    ...
+
+    @Component({
+        ...
+        templateUrl: '<a class="nav-link" (click)="showTickerAddDialog()">Add Symbols</a>',
+        ...
+    })
+    export class NavigationComponent implements OnInit {
+
+        ...
+
+        constructor(public navigationService: NavigationService, private modalService: NgbModal) {}
+
+        public showTickerAddDialog () {
+
+            let component = TickerAddComponent;
+
+                this.modalService.open(
+                component, 
+                { ariaLabelledBy: 'modal-basic-title', size: 'sm'}).result.then((result) => {
+                    // Dialog "closed" handler ...
+                }, (reason) => {
+                    // Dialog "dismissed" handler ...
+                });    
+        }    
+        ...
+3. Modify the child component so that it imports the proper ng-bootstrap libraries ( NgbActiveModal, NgbModal ). These are necessary to make it a modal dialog. The libraries also provide the ability to dismiss / close the dialog through calling activeModal.dismiss|close(). When either of these methods are called they will trigger the callback methods registered in the host component's .open() method.
+
+    ...
+    import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+    ...
+
+    @Component({
+    selector: 'app-ticker-add',
+    templateUrl: '  <div class="modal-header">
+                        <h4 class="modal-title">Add Symbols</h4>
+                        <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Dismissed')">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Dialog body goes here! -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Closed')">Close</button>
+                    </div>'
+    })
+    export class TickerAddComponent implements OnInit {
+        ...
+        constructor( private localStorageService: LocalStorageService, public activeModal: NgbActiveModal) { }
+        ...
+    }
+
+At this point we need to remove the routes for "Add News" and "Add Symbols" from the routing table. So we go from this :
+
+    const appRoutes: Routes = [
+        { path: '', component: TickerComponent },   
+        { path: 'addSymbol', component: TickerAddComponent },
+        { path: 'details/:id', component: TickerContainerComponent,
+            children:[       
+            { path: 'addNews', component: TickerNewsAddComponent},       
+            ] 
+        }      
+    ];
+
+To this :
+
+    const appRoutes: Routes = [
+        { path: '', component: TickerComponent },   
+        { path: 'details/:id', component: TickerContainerComponent }      
+    ];
+
+ This of course has some consequences. For starters they are no longer navigable through a url alone. At the very least this makes testing a little more tricky - at the expense of usability, of course. Everything has a trade off. 
 
 # Angular Seed
 

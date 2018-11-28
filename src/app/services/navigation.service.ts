@@ -10,11 +10,8 @@ export class NavigationService {
 
   constructor() {}
 
-  toggleAddNewsNavItem( show : boolean ) {
-    this.isAddNewsVisible = show;
-  } 
-
   setTicker( ticker: string) {
     this.ticker = ticker;
+    this.isAddNewsVisible = !(typeof ticker == 'undefined' || ticker == null);
   }
 }

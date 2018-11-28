@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { LocalStorageService } from '../../services/local-storage.service';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-ticker-add',
@@ -12,7 +13,7 @@ export class TickerAddComponent implements OnInit {
 
   addedSymbol : string;
 
-  constructor( private localStorageService: LocalStorageService) { }
+  constructor( private localStorageService: LocalStorageService, public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
     this.stockSymbols = this.localStorageService.getSymbols();

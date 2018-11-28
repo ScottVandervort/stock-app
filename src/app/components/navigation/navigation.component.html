@@ -1,15 +1,16 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand active" [routerLink]="['/']" href="#">My Stocks</a>
+    <a class="navbar-brand active" (click)="goHome()" [routerLink]="['/']" href="#">My Stocks</a>
     <button class="navbar-toggler" type="button" (click)="isCollapsed=!isCollapsed">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" [ngbCollapse]="isCollapsed">
       <ul class="navbar-nav mr-auto">    
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/addSymbol']">Add Symbols</a>
+          <a class="nav-link" (click)="showTickerAddDialog()">Add Symbols</a>
         </li>
         <li *ngIf="navigationService.isAddNewsVisible && navigationService.ticker " class="nav-item">
-          <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a>
+         <!-- <a class="nav-link" routerLink="details/{{navigationService.ticker}}/addNews">Add News</a> -->
+          <a class="nav-link" (click)="showTickerNewsAddDialog()">Add News</a>
         </li>            
       </ul>
     </div>

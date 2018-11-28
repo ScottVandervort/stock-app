@@ -39,6 +39,8 @@ import { NavigationComponent } from './components/navigation/navigation.componen
     FormsModule
   ],
   providers: [],
+  /* Components displayed in dialogs are added here ... */
+  entryComponents: [TickerAddComponent, TickerNewsAddComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
