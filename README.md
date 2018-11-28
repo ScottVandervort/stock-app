@@ -609,6 +609,7 @@ To make a component display in a modal dialog you will need to do the following 
 
 1. Add the child component that you want to display as a modal dialog  ( TickerAddComponent ) into your AppModule :
 
+    ```
     import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
     ...
@@ -631,6 +632,7 @@ To make a component display in a modal dialog you will need to do the following 
         ...
     })
     export class AppModule { }
+    ```
 
 2. Add a "click" handler to the component that will be hosting the modal dialog ( NavigationComponent ). modalService.open() displays the dialog. Callback methods can be specified as well. These will be invoked when the user closes or dismisses the dialog :
 
