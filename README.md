@@ -636,6 +636,7 @@ To make a component display in a modal dialog you will need to do the following 
 
 2. Add a "click" handler to the component that will be hosting the modal dialog ( NavigationComponent ). modalService.open() displays the dialog. Callback methods can be specified as well. These will be invoked when the user closes or dismisses the dialog :
 
+    ```
     import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
     import { TickerAddComponent } from '../../components/ticker-add/ticker-add.component';
 
@@ -665,8 +666,10 @@ To make a component display in a modal dialog you will need to do the following 
                 });    
         }    
         ...
+    ```
 3. Modify the child component so that it imports the proper ng-bootstrap libraries ( NgbActiveModal, NgbModal ). These are necessary to make it a modal dialog. The libraries also provide the ability to dismiss / close the dialog through calling activeModal.dismiss|close(). When either of these methods are called they will trigger the callback methods registered in the host component's .open() method.
 
+    ```
     ...
     import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
     ...
@@ -691,9 +694,11 @@ To make a component display in a modal dialog you will need to do the following 
         constructor( private localStorageService: LocalStorageService, public activeModal: NgbActiveModal) { }
         ...
     }
+    ```
 
 At this point we need to remove the routes for "Add News" and "Add Symbols" from the routing table. So we go from this :
 
+    ```
     const appRoutes: Routes = [
         { path: '', component: TickerComponent },   
         { path: 'addSymbol', component: TickerAddComponent },
@@ -703,13 +708,16 @@ At this point we need to remove the routes for "Add News" and "Add Symbols" from
             ] 
         }      
     ];
+    ```
 
 To this :
 
+    ```
     const appRoutes: Routes = [
         { path: '', component: TickerComponent },   
         { path: 'details/:id', component: TickerContainerComponent }      
     ];
+    ```
 
  This of course has some consequences. For starters they are no longer navigable through a url alone. At the very least this makes testing a little more tricky - at the expense of usability, of course. Everything has a trade off. 
 
