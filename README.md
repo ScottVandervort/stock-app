@@ -729,6 +729,18 @@ To this :
 
  This of course has some consequences. For starters they are no longer navigable through a url alone. At the very least this makes testing a little more tricky - at the expense of usability, of course. Everything has a trade off. 
 
+### 11/28/2018
+
+Properties must be public on a component if they are to be exposed to the template. Typescript will block.
+
+src\app\components\ticker-news-add\ticker-news-add.component.html(15,102): : Property 'addedNews' is private and only accessible within class 'TickerNewsAddComponent'.
+
+Deploying to Heroku
+
+https://medium.com/@hellotunmbi/how-to-deploy-angular-application-to-heroku-1d56e09c5147
+
+https://medium.com/@shubhsharma10/how-to-deploy-angular-6-app-to-heroku-52b73ac7a3aa
+
 # Angular Seed
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.4.
