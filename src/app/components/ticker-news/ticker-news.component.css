@@ -1,6 +1,7 @@
-.list-group{
+div {
     max-height: 300px;
     margin-bottom: 10px;
-    overflow:scroll;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }

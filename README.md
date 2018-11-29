@@ -1,5 +1,15 @@
 # StockApp
 
+The application is now running on Heroku at [https://stock-app-demo.herokuapp.com/stockapp](https://stock-app-demo.herokuapp.com/stockapp)
+
+I am still working out some issues :
+
+1. After adding Stock Symbols you will need to refresh the ["Home" Page](https://stock-app-demo.herokuapp.com/stockapp/). Currently the "Home Page" doesn't subscribe to chages in the users portfolio.
+
+2. The Chart on the "Stock Details" page may not immediately refresh depnding on whether or not the "free" financial REST service is cooperating.
+
+3. After adding Stock News you will need to refresh the "Stock Details" page ( for the same reason as # 1 above).
+
 ## This web application will allow the end user to ...
 
 1. Manage a list of ticker symbols
@@ -728,6 +738,107 @@ To this :
     ```
 
  This of course has some consequences. For starters they are no longer navigable through a url alone. At the very least this makes testing a little more tricky - at the expense of usability, of course. Everything has a trade off. 
+
+### 11/28/2018
+
+The application is now running on Heroku at [https://stock-app-demo.herokuapp.com/stockapp](https://stock-app-demo.herokuapp.com/stockapp)
+
+I am still working out some issues :
+
+1. After adding Stock Symbols you will need to refresh the ["Home" Page](https://stock-app-demo.herokuapp.com/stockapp/). Currently the "Home Page" doesn't subscribe to chages in the users portfolio.
+
+2. The Chart on the "Stock Details" page may not immediately refresh depnding on whether or not the "free" financial REST service is cooperating.
+
+3. After adding Stock News you will need to refresh the "Stock Details" page ( for the same reason as # 1 above).
+
+I will look into these in short order - but first ...
+
+#### Why Heroku?
+
+Well, it's free if you are just dork-ing around. Yes, there are lots of caveats that come along with "free" : the application sleeps after several minutes, it only runs in a single container ( or, "Dyno" if you want to use Heroku-speak ), the runtime hours are restricted. You can read all about it [here](https://www.heroku.com/free).
+
+It also offers free integration with Github. So, as you check-in changes for your project they are automatically picked up and deployed - also all free. So, you get a continuous integration build as well.
+
+Most importantly - it just worked. It took less than 30 minutes to get stock-app running ( more on that in a minute ).
+
+I tried alternatives such as [StackBlitz](https://stackblitz.com/) which allows you to essentially build your application online. It's not a hosting service. Stackblitz is more of a cooperative development tool where you can share, modify, and run an Angular project in real-time ( kind of like [jsFiddle](http://jsfiddle.net/) on steroids). What I didn't like about Stackblitz was that it was lacking Github integration. As my project already existed in Github I would have to re-create it in StackBlitz. 
+
+I also tried Github Pages per the [Angular documentation](https://angular.io/guide/deployment). Let's just say that it didn't "just work". Essentially you build your Angular application and "deploy" it to your Github repoistory from which it can be served. After messing around for over an hour I gave up. I couldn't get the javascript and css files to load properly.
+
+#### Setting Up for Heroku
+
+To set up my Angular application to run on Heroku I followed these two articles : [How to Deploy Angular Application to Heroku](https://medium.com/@hellotunmbi/how-to-deploy-angular-application-to-heroku-1d56e09c5147) and [Deploy Angular 6 app to Heroku](https://medium.com/@shubhsharma10/how-to-deploy-angular-6-app-to-heroku-52b73ac7a3aa).
+
+Essentially you will need to do the following to your Angular application to prepare it for Heroku :
+
+1. Include Express.js as a dependency in your package.json. [Express](https://expressjs.com/) is a web application framework for Node.JS
+
+    ```
+    npm install express path --save
+    ```
+
+2. Add a server.js file to your project; this sets up a simple web server ( Express ) that will serve the Angular application.
+
+    ```
+    //Install express server
+    const express = require('express');
+    const path = require('path');
+
+    const app = express();
+
+    // Serve only the static files form the dist directory
+    app.use(express.static(__dirname + '/dist/stock-app'));
+
+    app.get('/*', function(req,res) {
+        
+    res.sendFile(path.join(__dirname+'/dist/stock-app/index.html'));
+    });
+
+    // Start the app by listening on the default Heroku port
+    app.listen(process.env.PORT || 8080);
+    ```
+
+3. Add the following to the "scripts" section in your package.json; The "start" command will now launch "server.js"
+
+    ```
+    "scripts": {
+        ...
+        "start": "node server.js",
+        "postinstall": "ng build --aot --prod"
+        ...
+    }
+    ```
+
+4. Add an "engines" configuration section to your package.json. Make sure it targets the version of node and npm that you are using for your development.
+
+    ```
+    "engines": {
+        "node": "8.12.0",
+        "npm": "6.4.1"
+    }  
+    ``` 
+
+5. Add the following "dependencies" to your package.json :
+
+    ```
+    "dependencies": {
+        ...
+        "@angular/cli”: “1.4.9”,
+        "@angular/compiler-cli": "^4.4.6",
+        "typescript": "~2.9.2",
+        ...
+    }
+    ```
+
+The next step is to create an account on Heroku, add an application, and configure it to watch Github for changes. If changes are detetced Heroku will get the latest, build the application, and run it automatically. Pretty sweet!
+
+#### Exposing Component properties to a Template
+
+If you want to expose properties on a Component to a HTML template the properties need to be marked "public" else they will suffer the wrath of the Typescript validator. I found this out when attempting to build my application using "ng build". As I had my properties marked "private" I got this error :
+
+    src\app\components\ticker-news-add\ticker-news-add.component.html(15,102): : Property 'addedNews' is private and only accessible within class 'TickerNewsAddComponent'.
+
+"protected" didn't work, either. They need to be "public". Honestly, once transpiled into basic Javascript the access modifier doesn't make a heck of a difference. The error is 100% Typescript trying to assert good coding practices.
 
 # Angular Seed
 
