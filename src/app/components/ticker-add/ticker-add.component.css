@@ -3,4 +3,5 @@
     margin-bottom: 10px;
     overflow-y: scroll;
     overflow-wrap: break-word;
+    word-break: break-word;
 }
