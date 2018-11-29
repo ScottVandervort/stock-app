@@ -773,10 +773,13 @@ Essentially you will need to do the following to your Angular application to pre
 
 1. Include Express.js as a dependency in your package.json. [Express](https://expressjs.com/) is a web application framework for Node.JS
 
+    ```
     npm install express path --save
+    ```
 
 2. Add a server.js file to your project; this sets up a simple web server ( Express ) that will serve the Angular application.
 
+    ```
     //Install express server
     const express = require('express');
     const path = require('path');
@@ -793,32 +796,39 @@ Essentially you will need to do the following to your Angular application to pre
 
     // Start the app by listening on the default Heroku port
     app.listen(process.env.PORT || 8080);
+    ```
 
 3. Add the following to the "scripts" section in your package.json; The "start" command will now launch "server.js"
 
+    ```
     "scripts": {
         ...
         "start": "node server.js",
         "postinstall": "ng build --aot --prod"
         ...
     }
+    ```
 
 4. Add an "engines" configuration section to your package.json. Make sure it targets the version of node and npm that you are using for your development.
 
+    ```
     "engines": {
         "node": "8.12.0",
         "npm": "6.4.1"
-    }   
+    }  
+    ``` 
 
 5. Add the following "dependencies" to your package.json :
 
-     "dependencies": {
+    ```
+    "dependencies": {
         ...
         "@angular/cli”: “1.4.9”,
         "@angular/compiler-cli": "^4.4.6",
         "typescript": "~2.9.2",
         ...
-     }
+    }
+    ```
 
 The next step is to create an account on Heroku, add an application, and configure it to watch Github for changes. If changes are detetced Heroku will get the latest, build the application, and run it automatically. Pretty sweet!
 
