@@ -1,7 +1,7 @@
 .list-group{
     max-height: 300px;
     margin-bottom: 10px;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-wrap: break-word;
     word-break: break-word;
 }
