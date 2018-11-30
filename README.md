@@ -580,8 +580,6 @@ That's it for now. Still to come:
 
 6. The layout isn't very responsive ( yet ). I'd like make it look equally nice on smaller viewports.
 
-7. I'd like to flesh out some more unit tests. Ideally I should have been writting them first ( Hello? Test-Driven-Development ) but I didn't so now it's time to pay the piper...
-
 ### 11/26/2018 
 
 I finished fleshing out the TickerDetailsComponent so that when you view a stock you can see a whole bunch of cool information about it. I also added the ability to add ( TickerNewsAddComponent ) and view ( TickerNewsComponent ) news articles for a selected stock symbol.
@@ -842,20 +840,57 @@ If you want to expose properties on a Component to a HTML template the propertie
 
 ### 11/29/2018
 
-ReplaySubject
+Okay, so the stock application is deployed to Heroku and feature complete at this point. It's time to start fixing issues and applying some polish. The biggest offender so far? If I add new stock symbols to my portfolio or a news article the views aren't automatically updated. The "Home" page ( TickerComponent ) needs to be notified of these changes and automatically update itself when new stock symbols are added. 
 
-How the SUbject WOrks
+#### How to notify components of changes using the Rxjs Subject
+To do this I use the [Rxjs Subject and Subscriber](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/subjects.md). The Rxjs Subject/Subscriber is [more-or-less](https://hackernoon.com/observer-vs-pub-sub-pattern-50d3b27f838c) an implementation of the [Publisher/Subscriber](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) pattern:  a consumer ( TickerComponent ) subscribes to a publisher ( LocalStorageService ) to receive update notifications. 
 
+Currently, stock symbols are managed by a service ( LocalStorageService ). The service exposes addSymbol() and getSymbols() methods. addSymbol() is called by the "Add Symbol" component ( TickerAddComponent ) to add new stock symbols. getSymbols() is called by the "Home" component ( TickerComponent ) to retrieve the current stock symbols in the users portfolio.
 
+To make the "Home" component ( TickerComponent ) aware of changes made through the service ( LocalStorageService ) I made the following changes :
 
+I added a watchSymbols() method to the service which returns a Subject :
 
-https://nehalist.io/polling-in-angular/
+    ```
+    private addSymbolSubject : Subject<string> = new Subject<string>();
 
-https://makeitnew.io/polling-using-rxjs-8347d05e9104
+    ...
 
-https://stackoverflow.com/questions/14466285/can-i-observe-additions-to-an-array-with-rx-js
+    public watchSymbols () : Subject<string> { 
+        return this.addSymbolSubject;
+    }  
+    ```  
 
-https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/subjects.md
+Next, I modified the existing addSymbol() method to "notify" the Subject that a new stock symbol has been added :
+
+    ```
+    this.addSymbolSubject.next(symbol);
+    ```
+
+Next, in the component I subscribe to the Subject returned from watchSymbols(). Anytime next(symbol) is called from within the service all of its subscribers will be notified :
+
+    ```
+    allSymbols : string[] = [];
+    addSymbolSubscription : Subscription;
+
+    ...
+
+    addSymbolSubscription = this.localStorageService.watchSymbols().subscribe( symbol => {        
+      this.symbols.push( symbol );
+    });
+    ```
+
+Lastly, when the component gets disposed of I make sure to unsubscribe from the Subject so that it doesn't keep broadcasting to empty ears.
+
+    ```
+    ngOnDestroy() {
+        this.addSymbolSubscription.unsubscribe();
+    }
+    ```
+
+Subject only notifies new subscribers of changes that occured after they subscribed. Alternatively, you may also use the Rxjs [ReplaySubject](https://medium.com/@luukgruijs/understanding-rxjs-behaviorsubject-replaysubject-and-asyncsubject-8cc061f1cfc0) which maintains a history of all changes. When a new subscriber subscribes it will regurgitate everything that occured since the ReplaySubject was created.
+
+So that's it for now. Next up? A loading indicator for components that depend on asynchronous data.
 
 # Angular Seed
 
