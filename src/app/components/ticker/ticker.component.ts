@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { LocalStorageService } from '../../services/local-storage.service';
 import { TickerService } from '../../services/ticker.service';
 import { Quote } from '../../models/quote';
+import { Subscription } from 'rxjs';
 
 const PortfolioLookupInterval : number = 10000; // 10 seconds.
 
@@ -16,6 +17,7 @@ export class TickerComponent implements OnInit, OnDestroy {
   quotes : Quote [] = [];
   portfolioIntervalHandle : any;
   lastUpdated : Date;
+  addSymbolSubscription : Subscription;
   
   constructor(private tickerService : TickerService, private localStorageService : LocalStorageService) {}
 
@@ -32,18 +34,25 @@ export class TickerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
       clearInterval(this.portfolioIntervalHandle);
+      this.addSymbolSubscription.unsubscribe();
   }
 
   private init () {
-
-    // Get all stock symbols in the user's portfolio...
-    this.symbols = this.localStorageService.getSymbols();   
     
-    // ... and initialize empty quotes for them ( they will be periodically refreshed with real data ).
+    // Get all stock symbols in the user's portfolio...
+    this.symbols = this.localStorageService.getSymbols();       
+    // ... and initialize empty quotes for them.
     this.symbols.forEach( symbol => {  
       this.quotes.push( new Quote(symbol,0,0,0,0,0,"N/A",0,0,0))      
     });
 
+    // Subscribe to add" changes to the users' portfolio ...
+    this.addSymbolSubscription = this.localStorageService.watchSymbols().subscribe( symbol => {
+        // ... and initialize empty quotes for them so that they may be tracked.
+      this.symbols.push( symbol );
+      this.quotes.push( new Quote(symbol,0,0,0,0,0,"N/A",0,0,0) )  
+    });
+    
     this.lookupStockSymbols();    
   }
 

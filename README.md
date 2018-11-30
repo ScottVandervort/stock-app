@@ -690,7 +690,7 @@ To make a component display in a modal dialog you will need to do the following 
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
+     /               <div class="modal-body">
                         <!-- Dialog body goes here! -->
                     </div>
                     <div class="modal-footer">
@@ -728,6 +728,24 @@ To this :
     ```
 
  This of course has some consequences. For starters they are no longer navigable through a url alone. At the very least this makes testing a little more tricky - at the expense of usability, of course. Everything has a trade off. 
+
+### 11/29/2018
+
+ReplaySubject
+
+How the SUbject WOrks
+
+
+
+
+https://nehalist.io/polling-in-angular/
+
+https://makeitnew.io/polling-using-rxjs-8347d05e9104
+
+https://stackoverflow.com/questions/14466285/can-i-observe-additions-to-an-array-with-rx-js
+
+https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/subjects.md
+
 
 # Angular Seed
 

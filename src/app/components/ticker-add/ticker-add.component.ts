@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { LocalStorageService } from '../../services/local-storage.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-ticker-add',
@@ -13,15 +14,23 @@ export class TickerAddComponent implements OnInit {
 
   addedSymbol : string;
 
+  addSymbolSubscription : Subscription;
+
   constructor( private localStorageService: LocalStorageService, public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
+    // Get all stock symbols in the user's portfolio...
     this.stockSymbols = this.localStorageService.getSymbols();
+
+    // Subscribe to "add" changes to the users' portfolio ...
+    this.addSymbolSubscription = this.localStorageService.watchSymbols().subscribe( symbol => this.stockSymbols.push( symbol ) );
+  }
+
+  ngOnDestroy() {
+    this.addSymbolSubscription.unsubscribe();
   }
 
   onSubmit() {    
-    // TODO: Add validation.
     this.localStorageService.addSymbol(this.addedSymbol);
-    this.stockSymbols = this.localStorageService.getSymbols();
   }
 }

@@ -1,7 +1,9 @@
 import { SecurityContext } from '@angular/core';
 import { Injectable } from '@angular/core';
 import { Symbol } from '../models/symbol';
+import { News } from '../models/news';
 import { DomSanitizer } from '@angular/platform-browser';
+import { Subject } from 'rxjs';
 
 const LocalStorageDataName : string = 'stock-app-data';
 
@@ -10,10 +12,26 @@ const LocalStorageDataName : string = 'stock-app-data';
 })
 export class LocalStorageService {
 
-  storageEnabled : boolean = false;
+  private storageEnabled : boolean = false;
+  private addSymbolSubject : Subject<string> = new Subject<string>();
+  private addNewsSubject : Subject<News> = new Subject<News>();
 
   constructor(private sanitizer : DomSanitizer) { 
     this.storageEnabled = this.storageAvailable('localStorage');
+
+    // Was originally going to use a ReplaySubject - but I wasn't really fond of this nested loop (N^2) - and the fact that ALL 
+    // news articles would have to be broadcasted one-by-one every time a new subscriber was added.
+    
+    // this.getSymbols().forEach( symbol => { 
+       
+    //   this.symbolSubject.next(symbol);
+
+    //   this.getNews(symbol).forEach( news => {
+
+    //     this.newsSubject.next(new News(symbol,news));
+
+    //   })            
+    // });
   }
 
   addSymbol ( symbol: string ) {
@@ -43,12 +61,13 @@ export class LocalStorageService {
 
     data.push ( new Symbol(symbol, []) )
 
+    // Notify subscribers that a new stock symbol has been added to the portfolio.
+    this.addSymbolSubject.next(symbol);
+
     localStorage.setItem(LocalStorageDataName, JSON.stringify(data));
   }
 
   addNews ( symbol: string, news: string )  {
-
-    // TODO : Validate symbol against service.
 
     if ((typeof symbol == 'undefined') || (symbol == null) || symbol.trim() == '')
       return; // Symbol is invalid. Throw exception?
@@ -75,11 +94,23 @@ export class LocalStorageService {
           data[symbolIndex].news.push(news);
           break;
         }       
+
+    // Notfy subscribers that a new news article has been added to a stock symbol inb the portfolio.
+    let newsSubjectMsg : News = new News(symbol, news);
+    this.addNewsSubject.next(newsSubjectMsg);        
     
     localStorage.setItem(LocalStorageDataName, JSON.stringify(data));
   }  
 
-  getSymbols () : string[] {
+  public watchSymbols () : Subject<string> { 
+    return this.addSymbolSubject;
+  }
+
+  public watchNews ( ) : Subject<News> {
+    return this.addNewsSubject;
+  }
+
+  public getSymbols () : string[] {
 
     if (!this.storageEnabled) 
       return []; // Storage is not supported.
@@ -96,9 +127,7 @@ export class LocalStorageService {
     return result;
   }
 
-
-
-  getNews ( symbol: string ) : String [] {
+  public getNews ( symbol: string ) : string [] {
 
     if ((typeof symbol == 'undefined') || (symbol == null) || symbol.trim() == '')
       return []; // Symbol is invalid. Throw exception?
@@ -109,7 +138,7 @@ export class LocalStorageService {
     symbol = symbol.trim().toUpperCase();
 
     let data : Symbol [];
-    let result : String [];
+    let result : string [];
     
     data = JSON.parse(localStorage.getItem(LocalStorageDataName));
 
@@ -157,4 +186,9 @@ export class LocalStorageService {
               storage.length !== 0;
       }
   }
+
+  ngOnDestroy() {
+    this.addSymbolSubject.complete();
+    this.addNewsSubject.complete();
+  }    
 }
