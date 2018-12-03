@@ -11,13 +11,17 @@ import { NavigationService } from '../../services/navigation.service';
 export class TickerDetailsComponent implements OnInit {
 
   public quoteDetails : Quote;
+  public isLoading : boolean = false;
 
   constructor(private tickerService : TickerService, private navigationService : NavigationService) { }
 
   ngOnInit() {
     
+    this.isLoading = true;
+
     this.tickerService.getQuote(this.navigationService.ticker).subscribe( res => {     
       this.quoteDetails = res;
+      this.isLoading = false;
     })
   }
 }

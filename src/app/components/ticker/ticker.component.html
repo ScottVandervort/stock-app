@@ -1,17 +1,19 @@
-<table class="table table-striped">
-    <thead class="thead">
-      <tr>
-        <th class="col-md-6">Symbol</th>
-        <th class="col-md-3">Price</th>
-        <th class="col-md-3">Change</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let quote of quotes">
-          <td><a [routerLink]="['/details', quote.symbol]">{{quote.symbol}}</a></td>
-          <td>{{quote.price}}</td>
-          <td>{{quote.change}}</td>
+<div class="col-lg-12">
+  <table class="table table-striped">
+      <thead class="thead">
+        <tr>
+          <th class="col-md-6">Symbol</th>
+          <th class="col-md-3">Price</th>
+          <th class="col-md-3">Change</th>
         </tr>
-    </tbody>
-  </table>
-  Last Updated : {{lastUpdated}}
+      </thead>
+      <tbody>
+          <tr *ngFor="let quote of quotes">
+            <td><a [routerLink]="['/details', quote.symbol]">{{quote.symbol}}</a></td>
+            <td>{{quote.price}}</td>
+            <td>{{quote.change}}</td>
+          </tr>
+      </tbody>
+    </table>
+    Last Updated : {{lastUpdated}}
+</div>

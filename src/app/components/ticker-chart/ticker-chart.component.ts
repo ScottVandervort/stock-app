@@ -17,6 +17,8 @@ const ChartHeight : number = 400;
 })
 export class TickerChartComponent implements OnInit {
 
+  public isLoading = false;
+
   constructor(private tickerService : TickerService, private navigationService : NavigationService) { }
 
   ngOnInit() {
@@ -24,8 +26,11 @@ export class TickerChartComponent implements OnInit {
     // Give the user something to look at for now ...
     this.showChart([]);
 
+
+    this.isLoading = true;
     this.tickerService.getHistoricalQuote(this.navigationService.ticker).subscribe( res => {      
       this.showChart(res);
+      this.isLoading = false;
     })
   }
 

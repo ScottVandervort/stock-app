@@ -18,7 +18,8 @@ export class TickerComponent implements OnInit, OnDestroy {
   portfolioIntervalHandle : any;
   lastUpdated : Date;
   addSymbolSubscription : Subscription;
-  
+  isLoading : boolean = false;
+
   constructor(private tickerService : TickerService, private localStorageService : LocalStorageService) {}
 
   ngOnInit() {
@@ -58,6 +59,10 @@ export class TickerComponent implements OnInit, OnDestroy {
 
   // Gets quotes for each of the stock symbols.
   private lookupStockSymbols () {
+    
+    var quotesToLoad = this.symbols.length;
+    
+    this.isLoading = true;
 
     this.symbols.forEach( symbol => {      
       
@@ -71,8 +76,11 @@ export class TickerComponent implements OnInit, OnDestroy {
             oldQuote.price = newQuote.price;                     
           }
                       
-          this.lastUpdated = new Date();          
-
+          quotesToLoad--;
+          if (quotesToLoad <= 0) {
+            this.lastUpdated = new Date();          
+            this.isLoading = false;
+          }
         }
       )
     })

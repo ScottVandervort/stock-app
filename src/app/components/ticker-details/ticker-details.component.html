@@ -1,4 +1,5 @@
 <div class="col-12">
+    <ngx-loading [show]="isLoading"></ngx-loading>
     <div class="row">
       <div class="col-6">Symbol : {{quoteDetails ? quoteDetails.symbol : 'N/A'}}</div>
       <div class="col-6">Open : {{quoteDetails ? quoteDetails.open : 'N/A'}}</div>

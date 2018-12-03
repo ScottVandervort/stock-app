@@ -892,6 +892,92 @@ Subject only notifies new subscribers of changes that occured after they subscri
 
 So that's it for now. Next up? A loading indicator for components that depend on asynchronous data.
 
+### 12/03/2018 
+
+I added a loading indicator. It required more consideration that I initially expected. For example :
+
+1. Do I display a single solitary loading indicator anytime a asynchronous call is being made, or ...
+2. ... do I display a loading indicator per Component? 
+3. Do I roll out my own Css - or use a plugin?
+4. Should I block user input when someything is loading?
+
+... see? Lot's of questions. I went with "no", "yes", "plugin", and "no" - and found a cool plugin that would take me most of the way there called [ngx-loading](https://github.com/Zak-C/ngx-loading#config-options).
+
+#### A Loading Indicator
+It was relatively easy to install as use. You just need to install it :
+
+    '''
+    npm install --save ngx-loading
+    '''
+
+Reference it in you AppModule :
+
+    '''
+    import {NgxLoadingModule, ngxLoadingAnimationTypes} from 'ngx-loading';
+
+    @NgModule({
+        ...    
+        imports: [
+            ...
+            NgxLoadingModule.forRoot({     
+                animationType: ngxLoadingAnimationTypes.circleSwish
+            })
+        ],
+        ...
+
+Add a toggle ( isLoading ) in the Component ( ChartComponent ) :
+
+    '''
+    public isLoading : boolean = false;
+
+    ...
+
+    ngOnInit() {
+
+        // Give the user something to look at for now ...
+        this.showChart([]);
+
+        this.isLoading = true;
+        this.tickerService.getHistoricalQuote(this.navigationService.ticker).subscribe( res => {      
+            this.showChart(res);
+            this.isLoading = false;
+        })
+    }
+    '''
+
+And add the selector ( ngx-loading ) to the Components template :
+
+    '''
+    <div class="col-lg-12">
+        <div id="chart"></div>
+        <ngx-loading [show]="isLoading"></ngx-loading>
+    </div>
+    '''
+
+#### Stop blocking my Modal Dialogs
+Works like a charm. Or does it?  The loading spinner has a nasty habit of blocking Bootstrap's Modal Dialogs ( "Add Symbol" and "Add News" ). By default it drapes a semi-transparent overlay on top of a component. This looks great up until a dialog is displayed - and then well, it doesn't look so great anymore. To fix this issue I just ditched the overlay altogether by conifguring the loading indicator to be fully transparent ( backdropBackgroundColour ) : 
+
+    '''
+    NgxLoadingModule.forRoot({     
+      backdropBackgroundColour: 'rgba(0, 0, 0, 0)',    
+      primaryColour: 'steelblue',
+      animationType: ngxLoadingAnimationTypes.circleSwish
+    })
+    '''
+
+The loading indicator animation also displays on top of modal dialog. This prevents a user from adding tickers and news. To fix this issue I had to adjust the "z-index" style for the loading indicator so that it is less than that of Bootstrap's Modal Dialog. I did this in the "styles.css" so that all instances of the loading indicator are effected:
+
+    '''
+    ngx-loading .backdrop {
+        z-index: 1000 !important;
+    }
+
+    ngx-loading .spinner-circle-swish {
+        z-index: 1001 !important;
+    }
+    '''
+Next up? Adding the ability to delete stock symbols and news...
+
 # Angular Seed
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.4.
