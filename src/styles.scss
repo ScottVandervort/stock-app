@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~bootstrap/dist/css/bootstrap.min.css';
+@import 'variables.scss';
 
 ngx-loading .backdrop {
     z-index: 1000 !important;
@@ -7,4 +8,17 @@ ngx-loading .backdrop {
 
 ngx-loading .spinner-circle-swish {
     z-index: 1001 !important;
+}
+
+.even { background-color: rgba(0,0,0,0); }
+.odd { background-color: rgba(0,0,0,.05); }
+
+
+ul {
+  list-style-type: none;
+}
+
+li {
+    margin-top:5px;
+    margin-bottom: 5px;
 }

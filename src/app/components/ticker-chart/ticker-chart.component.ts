@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, HostListener } from '@angular/core';
 import * as d3 from 'd3';
 import { HistoricalQuote } from 'src/app/models/historical-quote';
 import { TickerService } from '../../services/ticker.service';
@@ -6,30 +6,41 @@ import { NavigationService } from '../../services/navigation.service';
 
 const DateFormat="%Y-%m-%d";
 const ChartEl : string ="#chart";
-const ChartWidth : number = 600;
-const ChartHeight : number = 400;
+const ChartMaxWidth : number = 640;
+const ChartMaxHeight : number = 340;
 
 @Component({
   encapsulation: ViewEncapsulation.None,  
   selector: 'app-ticker-chart',
   templateUrl: './ticker-chart.component.html',
-  styleUrls: ['./ticker-chart.component.css']
+  styleUrls: ['./ticker-chart.component.scss']
 })
 export class TickerChartComponent implements OnInit {
 
   public isLoading = false;
+  private historicalQuotes : HistoricalQuote[] = [];
+  private chartWidth : number = 340;
 
-  constructor(private tickerService : TickerService, private navigationService : NavigationService) { }
+  constructor(private tickerService : TickerService, private navigationService : NavigationService ) { }
+  
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    this.chartWidth = Math.min(ChartMaxWidth,window.innerWidth);
+    this.showChart(this.historicalQuotes);
+  }
 
   ngOnInit() {
 
-    // Give the user something to look at for now ...
-    this.showChart([]);
+    // Get the initial width of the viewport.
+    this.chartWidth = Math.min(ChartMaxWidth,window.innerWidth);
 
+    // Give the user something to look at for now ...
+    this.showChart(this.historicalQuotes);
 
     this.isLoading = true;
-    this.tickerService.getHistoricalQuote(this.navigationService.ticker).subscribe( res => {      
-      this.showChart(res);
+    this.tickerService.getHistoricalQuote(this.navigationService.ticker).subscribe( res => {   
+      this.historicalQuotes = res;   
+      this.showChart(this.historicalQuotes);
       this.isLoading = false;
     })
   }
@@ -51,9 +62,9 @@ export class TickerChartComponent implements OnInit {
     })
 
     // set the dimensions and margins of the graph
-    var margin = {top: 20, right: 20, bottom: 30, left: 50},
-        width = ChartWidth - margin.left - margin.right,
-        height = ChartHeight - margin.top - margin.bottom;
+    var margin = {top: 10, right: 50, bottom: 30, left: 50},
+        width = this.chartWidth - margin.left - margin.right,
+        height = ChartMaxHeight - margin.top - margin.bottom;
   
     // parse the date / time
     var parseTime = d3.timeParse(DateFormat);

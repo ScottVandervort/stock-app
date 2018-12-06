@@ -1,0 +1,10 @@
+/* You can add global styles to this file, and also import other style files */
+@import '~bootstrap/dist/css/bootstrap.min.css';
+
+$info-color: steelblue;
+
+@mixin textFormat {
+    overflow-y: auto;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}

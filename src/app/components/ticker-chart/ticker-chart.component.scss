@@ -1,5 +1,7 @@
+@import '../../../variables.scss';
+
 path {
-    stroke: steelblue;
+    stroke: $info-color;
     stroke-width: 2;
     fill: none;
 }

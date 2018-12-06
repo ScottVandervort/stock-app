@@ -5,7 +5,7 @@ import { NavigationService } from 'src/app/services/navigation.service';
 @Component({
   selector: 'app-ticker-container',
   templateUrl: './ticker-container.component.html',
-  styleUrls: ['./ticker-container.component.css']
+  styleUrls: ['./ticker-container.component.scss']
 })
 export class TickerContainerComponent implements OnInit {
 

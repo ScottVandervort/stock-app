@@ -1,4 +1,6 @@
-<div class="col-12" *ngFor="let news of allNews">
-    {{news}}
-</div>
+<ul class="col-12">
+    <li [ngClass]="{ odd: odd, even: even }" *ngFor="let news of allNews; let odd=odd; let even=even;">    
+        {{news}}
+    </li>
+</ul>
 

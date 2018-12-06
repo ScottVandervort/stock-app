@@ -6,9 +6,9 @@
 </div>
 <div class="modal-body">
   <ul class="list-group">
-    <li *ngFor="let stockSymbol of stockSymbols" class="list-group-item">{{stockSymbol}}</li>
+    <li [ngClass]="{ odd: odd, even: even }" *ngFor="let stockSymbol of stockSymbols; let odd=odd; let even=even;" class="list-group-item">{{stockSymbol}}</li>
   </ul>  
-  <form (ngSubmit)="onSubmit()">
+  <form autocomplete="off" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <input type="text" class="form-control" id="stockSymbol" name="stockSymbol" placeholder="Enter stock symbol"  [(ngModel)]="addedSymbol">
     </div>

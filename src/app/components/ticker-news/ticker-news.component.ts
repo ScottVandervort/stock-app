@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-ticker-news',
   templateUrl: './ticker-news.component.html',
-  styleUrls: ['./ticker-news.component.css']
+  styleUrls: ['./ticker-news.component.scss']
 })
 export class TickerNewsComponent implements OnInit, OnDestroy {
 

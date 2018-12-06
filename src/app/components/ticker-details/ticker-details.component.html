@@ -1,15 +1,15 @@
 <div class="col-12">
     <ngx-loading [show]="isLoading"></ngx-loading>
     <div class="row">
-      <div class="col-6">Symbol : {{quoteDetails ? quoteDetails.symbol : 'N/A'}}</div>
-      <div class="col-6">Open : {{quoteDetails ? quoteDetails.open : 'N/A'}}</div>
-      <div class="col-6">High : {{quoteDetails ? quoteDetails.high : 'N/A'}}</div>
-      <div class="col-6">Low : {{quoteDetails ? quoteDetails.low : 'N/A'}}</div>
-      <div class="col-6">Price : {{quoteDetails ? quoteDetails.price : 'N/A'}}</div>
-      <div class="col-6">Volume : {{quoteDetails ? quoteDetails.volume : 'N/A'}}</div>
-      <div class="col-6">Latest Trading Day : {{quoteDetails ? quoteDetails.latestTradingDay : 'N/A'}}</div>
-      <div class="col-6">Previous Close : {{quoteDetails ? quoteDetails.previousClose : 'N/A'}}</div>
-      <div class="col-6">Change : {{quoteDetails ? quoteDetails.change : 'N/A'}}</div>
-      <div class="col-6">Change Percent : {{quoteDetails ? quoteDetails.changePercent : 'N/A'}}</div>    
+      <div class="col-6">Symbol : <span class="quote-value">{{quoteDetails ? quoteDetails.symbol : 'N/A'}}</span></div>
+      <div class="col-6">Open : <span class="quote-value">{{quoteDetails ? quoteDetails.open : 'N/A'}}</span></div>
+      <div class="col-6">High : <span class="quote-value">{{quoteDetails ? quoteDetails.high : 'N/A'}}</span></div>
+      <div class="col-6">Low : <span class="quote-value">{{quoteDetails ? quoteDetails.low : 'N/A'}}</span></div>
+      <div class="col-6">Price : <span class="quote-value">{{quoteDetails ? quoteDetails.price : 'N/A'}}</span></div>
+      <div class="col-6">Volume : <span class="quote-value">{{quoteDetails ? quoteDetails.volume : 'N/A'}}</span></div>
+      <div class="col-sm-12 col-md-6">Latest Trading Day : <span class="quote-value">{{quoteDetails ? quoteDetails.latestTradingDay : 'N/A'}}</span></div>
+      <div class="col-sm-12 col-md-6">Previous Close : <span class="quote-value">{{quoteDetails ? quoteDetails.previousClose : 'N/A'}}</span></div>
+      <div class="col-sm-12 col-md-6">Change : <span class="quote-value">{{quoteDetails ? quoteDetails.change : 'N/A'}}</span></div>
+      <div class="col-sm-12 col-md-6">Change Percent : <span class="quote-value">{{quoteDetails ? quoteDetails.changePercent : 'N/A'}}</span></div>    
     </div>
 </div>

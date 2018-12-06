@@ -9,7 +9,7 @@ const PortfolioLookupInterval : number = 10000; // 10 seconds.
 @Component({
   selector: 'app-ticker',
   templateUrl: './ticker.component.html',
-  styleUrls: ['./ticker.component.css']
+  styleUrls: ['./ticker.component.scss']
 })
 export class TickerComponent implements OnInit, OnDestroy {
 

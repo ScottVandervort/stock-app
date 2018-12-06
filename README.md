@@ -978,7 +978,7 @@ The loading indicator animation also displays on top of modal dialog. This preve
     '''
 Next up? Adding the ability to delete stock symbols and news...
 
-### 12/4/2018
+### 12/6/2018
 
 We need to give the user a way to delete stock symbols from their portfolio. On the "Home" page ( TickerComponent ) I hooked up a new "Delete" button like so :
 
@@ -1106,6 +1106,132 @@ And the subscriber ( TickerComponent ) needs to handle the additionaly informati
     '''
 
 That should do it! Now the user can delete stock symbols from their portfolio. Next up? It's time to make the application responsive across different devices. As we're using Bootstrap this should be a piece-of-cake...
+
+### 12/6/2018
+
+We're almost done! The last thing to do is to clean up some of the styling and make the website more responsive to different devices. 
+
+#### Enabling SASS
+First things first is to enable [SASS](https://sass-lang.com/). SASS is a superset of CSS that allows for variables and mixins. The Angular CLI already has support for it built-in and will automatically transpile it into .CSS that can run on the web-browser. All you need to do is :
+
+1. Change the extensions of your "src/style.css" file to .scss.
+
+2. Modify the "src/angular.json" file in the application root to reference the revised file extension from .css to .scss. Like this :
+
+    '''
+    "styles": [
+        "src/styles.scss"
+    ]
+    '''
+3. For each component you will need to do something similar :
+
+    @Component({
+        ...
+        styleUrls: ['./ticker-add.component.scss']
+    })
+    export class TickerAddComponent implements OnInit {
+
+#### SASS Global Variables
+
+Once SASS has been enabled you can create global variables for the entire website. I created a new "src/variables.scss" which I import and used in the ChartComponent, TickerAddNewsComponent, and TickerAddComponent. It looks like this :
+
+    '''
+    /* You can add global styles to this file, and also import other style files */
+    @import '~bootstrap/dist/css/bootstrap.min.css';
+
+    $info-color: steelblue;
+
+    @mixin textFormat {
+        overflow-y: auto;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+    '''
+
+And I import it and use it in other SCSS files like this. Here is the TickerAddComponents .scss file :
+
+    '''
+    @import '../../../variables.scss';
+    @import '../../../styles.scss';
+
+    .list-group{
+        max-height: 300px;
+        margin-bottom: 10px;
+        @include textFormat(); 
+    }
+    '''
+
+And here is the TickerChartComponents .scss file :
+
+    @import '../../../variables.scss';
+
+    path {
+        stroke: $info-color;
+        stroke-width: 2;
+        fill: none;
+    }
+    .axis path, .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+Variables are declared and used with a dollar sign($). A mixin is sort of a "code fragment" than can be reused. It is used with a $include declaration. This is just the tip of the iceberg as far as what SASS can do. As a developer its benefical because it normalizes you CSS and provides a lot of reusability. I don't have to keep declaring the same stuff again and again and again ...
+
+#### Alternating row colors
+
+When looking at a long list of data it helps to alternate colors for each row. It is easier on the eyes. Fortunately, Angular makes this very easy. The [ngfor directive has several local variables](https://angular.io/api/common/NgForOf#description) that we can use to flip-flop styling for odd and even rows. For each iteration of of ngfor odd ( or even ) is set to a local variable that triggers the appropriate class. 
+
+Here's the class :
+
+    '''
+    .even { background-color: rgba(0,0,0,0); }  /* White */
+    .odd { background-color: rgba(0,0,0,.05); } /* Grey */
+    '''
+
+The "ng-for" from TickerAddComponent :
+
+    '''
+    <ul class="list-group">
+        <li [ngClass]="{ odd: odd, even: even }" *ngFor="let stockSymbol of stockSymbols; let odd=odd; let even=even;" class="list-group-item">{{stockSymbol}}</li>
+    </ul>  
+    '''
+
+And the component ( nothing really interesting here but I thought I'd post it for solidarity ) :
+    
+    '''
+    @Component({
+        ...
+    })
+    export class TickerAddComponent implements OnInit {
+        ...
+        stockSymbols : string [] = [];
+    '''
+
+#### Resizing the D3.js Chart
+
+The D3.js chart is of a fixed size. Ideally, I would like it to scale a little when the viewport changes from desktop to say, a mobile device. To do this I "listen" to the browser's resize events. When the browser's viewport changes I re-render the Chart to fit the new size. The implementation looks like this :
+
+    '''
+    import { ..., HostListener } from '@angular/core';
+
+    @Component({
+        ...
+    })
+    export class TickerChartComponent implements OnInit {
+
+        @HostListener('window:resize', ['$event'])
+        onResize(event) {
+            let chartWidth : number = window.innerWidth;
+            this.showChart(chartWidth);
+        }
+    '''
+
+And that's it! We're done! 
+
+If you'd like to take a look at the application it is running on Heroku at [https://stock-app-demo.herokuapp.com/stockapp](https://stock-app-demo.herokuapp.com/stockapp).
+
 
 # Angular Seed
 

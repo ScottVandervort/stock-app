@@ -7,10 +7,10 @@
 <div class="modal-body">
 
   <ul *ngIf="allTickerNews && allTickerNews.length > 0" class="list-group">
-    <li *ngFor="let tickerNews of allTickerNews" class="list-group-item">{{tickerNews}}</li>
+    <li [ngClass]="{ odd: odd, even: even }" *ngFor="let tickerNews of allTickerNews; let odd=odd; let even=even;" class="list-group-item">{{tickerNews}}</li>
   </ul>  
   
-  <form (ngSubmit)="onSubmit()">
+  <form autocomplete="off" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <textarea class="form-control" id="stockNews" name="stockNews" placeholder="Enter stock news"  [(ngModel)]="addedNews"></textarea>
     </div>

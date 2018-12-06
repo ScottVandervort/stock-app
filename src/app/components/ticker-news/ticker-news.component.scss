@@ -1,0 +1,8 @@
+@import '../../../variables.scss';
+
+div {    
+    max-height: 300px;
+    margin-bottom: 10px;
+    @include textFormat(); 
+}
+

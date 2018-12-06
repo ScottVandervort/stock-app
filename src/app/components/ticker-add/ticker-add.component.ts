@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-ticker-add',
   templateUrl: './ticker-add.component.html',
-  styleUrls: ['./ticker-add.component.css']
+  styleUrls: ['./ticker-add.component.scss']
 })
 export class TickerAddComponent implements OnInit {
 
@@ -47,5 +47,6 @@ export class TickerAddComponent implements OnInit {
 
   onSubmit() {    
     this.localStorageService.addSymbol(this.addedSymbol);
+    this.addedSymbol = ""; 
   }
 }

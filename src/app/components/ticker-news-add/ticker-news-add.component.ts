@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-ticker-news-add',
   templateUrl: './ticker-news-add.component.html',
-  styleUrls: ['./ticker-news-add.component.css']
+  styleUrls: ['./ticker-news-add.component.scss']
 })
 export class TickerNewsAddComponent implements OnInit, OnDestroy {
 
@@ -38,5 +38,6 @@ export class TickerNewsAddComponent implements OnInit, OnDestroy {
 
   onSubmit() {    
     this.localStorageService.addNews(this.navigationService.ticker,this.addedNews);
+    this.addedNews = "";
   }
 }
