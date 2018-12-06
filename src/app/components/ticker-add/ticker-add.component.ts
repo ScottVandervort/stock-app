@@ -14,7 +14,7 @@ export class TickerAddComponent implements OnInit {
 
   addedSymbol : string;
 
-  addSymbolSubscription : Subscription;
+  symbolSubscription : Subscription;
 
   constructor( private localStorageService: LocalStorageService, public activeModal: NgbActiveModal) { }
 
@@ -22,12 +22,27 @@ export class TickerAddComponent implements OnInit {
     // Get all stock symbols in the user's portfolio...
     this.stockSymbols = this.localStorageService.getSymbols();
 
-    // Subscribe to "add" changes to the users' portfolio ...
-    this.addSymbolSubscription = this.localStorageService.watchSymbols().subscribe( symbol => this.stockSymbols.push( symbol ) );
+    // Subscribe to changes to the users' portfolio ...
+    this.symbolSubscription = this.localStorageService.watchSymbols().subscribe( msg => {
+
+      if (msg.isAdded) {
+        // Add a new symbol.
+        this.stockSymbols.push( msg.obj ) ;
+      }
+      else {
+        // Remove an existing symbol.
+        for (var stockSymbolIndex = this.stockSymbols.length; stockSymbolIndex >=0; stockSymbolIndex--) {
+          if (this.stockSymbols[stockSymbolIndex] == msg.obj) {
+            this.stockSymbols.splice(stockSymbolIndex,1);
+            break;
+          }
+        }
+      }
+    });
   }
 
   ngOnDestroy() {
-    this.addSymbolSubscription.unsubscribe();
+    this.symbolSubscription.unsubscribe();
   }
 
   onSubmit() {    

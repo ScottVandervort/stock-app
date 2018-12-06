@@ -15,7 +15,7 @@ export class TickerNewsAddComponent implements OnInit, OnDestroy {
 
   public addedNews : string;
 
-  addNewsSubscription : Subscription;
+  newsSubscription : Subscription;
 
   constructor( private localStorageService: LocalStorageService,  private navigationService : NavigationService, public activeModal: NgbActiveModal) { }
 
@@ -23,18 +23,17 @@ export class TickerNewsAddComponent implements OnInit, OnDestroy {
     // Get all news for the stock ticker currently being perused by the user ...
     this.allTickerNews = this.localStorageService.getNews(this.navigationService.ticker);
 
-    // Subscribe to "add news" changes to the users' portfolio ...
-    this.addNewsSubscription = this.localStorageService.watchNews().subscribe( news => {    
-      // ... if the news is for the stock symbol being viewed by the user ...
-      if (news.symbol == this.navigationService.ticker) {
-        // ... add it.
-        this.allTickerNews.push( news.news );
+    // Subscribe to changes to the users' portfolio ...
+    this.newsSubscription = this.localStorageService.watchNews().subscribe( msg => {   
+      // News is being added ...
+      if ((msg.isAdded) && (msg.obj.symbol == this.navigationService.ticker)) {
+        this.allTickerNews.push( msg.obj.news );
       }
     });
   }
 
   ngOnDestroy() {
-    this.addNewsSubscription.unsubscribe();
+    this.newsSubscription.unsubscribe();
   }
 
   onSubmit() {    

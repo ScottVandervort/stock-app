@@ -574,7 +574,7 @@ That's it for now. Still to come:
 
 3. I would like the "Add News/Symbols" pages to appear as Modal Dialogs on the "Home" and "Details" pages. 
 
-4. The user really needs the ability to delete stock symbols and news from their portfolio. 
+4. The user really needs the ability to delete stock symbols from their portfolio. 
 
 5. Rather than display a empty chart and/or "N/A" for a stock I'd really like to present a loading indicator of sorts.
 
@@ -977,6 +977,135 @@ The loading indicator animation also displays on top of modal dialog. This preve
     }
     '''
 Next up? Adding the ability to delete stock symbols and news...
+
+### 12/4/2018
+
+We need to give the user a way to delete stock symbols from their portfolio. On the "Home" page ( TickerComponent ) I hooked up a new "Delete" button like so :
+
+    '''
+    <tbody>
+        <tr *ngFor="let quote of quotes">
+            ...     
+            <td class="delete-symbol" (click)="deleteSymbol(quote.symbol)">Delete</td>
+        </tr>
+    </tbody>
+    '''
+
+The component calls a new removeSymbol() method of on the Storage Service :
+
+    '''
+    public deleteSymbol ( symbol: string) {
+        this.localStorageService.removeSymbol(symbol);
+    }
+    '''
+
+Before I dive into the StorageService let's change the "Home" page to display an icon instead of the word "Delete".
+
+#### Where are my Bootstrap icons ( gylphs )?
+Bootstrap used to include a library of icons/glyphs. However, these were removed with the release of Bootstrap 4. Now, we're forced to find an alternative. 
+
+Initially I tried to use [FontAwesome](https://fontawesome.com/). FontAwesome supports scalable (SVG-based) fonts and icons. These are perfect for responsive applications that needs to look good across a variety of devices. Or would have ... Unfortuately, I had some issues getting the FontAwesome icons to display consistently. Although the icons would display properly when the application was first loaded ( or refreshed ) I found that navigating through a router link would make the icons disappear. I have yet to find a solution to the problem. Time for a back-up plan ...
+
+#### UTF-8 Dingbats
+Time to use the poor man's icons - [dingbats](https://www.w3schools.com/charsets/ref_utf_dingbats.asp). These are default characters included with UTF-8 that can be substituited for icons in a pinch. They aren't perfect for sure. They don't scale as well and they may not be supported across all devices. However, for now they'll suffice. And? They're easy to use. Just do this :
+
+    '''
+    <p>&#x2716;</p>
+    '''
+
+So, now the "Home" page ( TickerComponent ) looks like this :
+
+    '''
+    <td class="delete-symbol" (click)="deleteSymbol(quote.symbol)">&#x2716;</td>
+    '''
+
+... and done!
+
+#### A More Robust Rxjs Subject 
+
+To support the removal of symbols I modified the Rxjs Subject that is exposed through the Local Storage Service ( LocalStorageService ). Whereas before the Subject alerted subscribers of new stock symbols - now I want it to notify of removals as well. 
+
+The Subject broadcasts a payload. Previously, I just broadcasted the stcok symbol ( a string ) and the subscribers assumed that it was always an "add" :
+
+    '''
+    Subject<string>
+    '''
+
+To support "remove" I created a generic "wrapper" class to wrap the Subject's payload :
+
+    '''
+    export class Changed <T> {
+
+        constructor ( obj: T, isAdded: boolean ) {
+            this.obj = obj;
+            this.isAdded = isAdded;
+        }
+
+        obj: T;
+        isAdded: boolean;
+    }
+    '''
+
+Now my Subject for stock symbol changes looks like this :
+
+    '''
+    Subject<Changed<string>>
+    '''
+
+Now when broadcasting the changes from the StorageService I need to specify whether the symbol was added ( true ) - or removed ( false ) :
+
+    '''
+    ...
+    export class LocalStorageService {
+        ...
+
+        private symbolSubject : Subject<Changed<string>> = new Subject<Changed<string>>();
+
+        ...
+        
+        addSymbol ( symbol: string ) {    
+            ...
+            // Notify subscribers that a new stock symbol has been added to the portfolio.
+            this.symbolSubject.next(new Changed<string> (symbol, true));
+            '''
+
+        removeSymbol ( symbol: string ) {    
+            ...
+            // Notify subscribers that a new stock symbol has been removed from the portfolio.
+            this.symbolSubject.next(new Changed<string> (symbol, false));
+            '''            
+
+And the subscriber ( TickerComponent ) needs to handle the additionaly information as well :
+
+    '''
+    symbolSubscription : Subscription;
+    symbols : string [] = [];
+
+    ...
+
+    // Subscribe to changes to the users' portfolio ...
+    this.symbolSubscription = this.localStorageService.watchSymbols().subscribe( msg => {
+        if (msg.isAdded) {
+            // A stock symbol has been added ...
+            this.symbols.push( msg.obj );
+            ...
+        }
+        else {
+            // A symbol has been removed ...
+
+            for (var stockSymbolIndex = this.symbols.length-1; stockSymbolIndex>=0;stockSymbolIndex--) {
+                if (this.symbols[stockSymbolIndex] == msg.obj) {
+                    this.symbols.splice(stockSymbolIndex,1);
+                    break;
+                }
+            }
+            ...
+        }
+    });
+
+    '''
+
+That should do it! Now the user can delete stock symbols from their portfolio. Next up? It's time to make the application responsive across different devices. As we're using Bootstrap this should be a piece-of-cake...
 
 # Angular Seed
 

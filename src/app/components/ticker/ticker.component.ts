@@ -17,7 +17,7 @@ export class TickerComponent implements OnInit, OnDestroy {
   quotes : Quote [] = [];
   portfolioIntervalHandle : any;
   lastUpdated : Date;
-  addSymbolSubscription : Subscription;
+  symbolSubscription : Subscription;
   isLoading : boolean = false;
 
   constructor(private tickerService : TickerService, private localStorageService : LocalStorageService) {}
@@ -35,7 +35,11 @@ export class TickerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
       clearInterval(this.portfolioIntervalHandle);
-      this.addSymbolSubscription.unsubscribe();
+      this.symbolSubscription.unsubscribe();
+  }
+
+  public deleteSymbol ( symbol: string) {
+    this.localStorageService.removeSymbol(symbol);
   }
 
   private init () {
@@ -47,11 +51,33 @@ export class TickerComponent implements OnInit, OnDestroy {
       this.quotes.push( new Quote(symbol,0,0,0,0,0,"N/A",0,0,0))      
     });
 
-    // Subscribe to add" changes to the users' portfolio ...
-    this.addSymbolSubscription = this.localStorageService.watchSymbols().subscribe( symbol => {
-        // ... and initialize empty quotes for them so that they may be tracked.
-      this.symbols.push( symbol );
-      this.quotes.push( new Quote(symbol,0,0,0,0,0,"N/A",0,0,0) )  
+    // Subscribe to changes to the users' portfolio ...
+    this.symbolSubscription = this.localStorageService.watchSymbols().subscribe( msg => {
+      if (msg.isAdded) {
+        // A stock symbol has been added ...
+        this.symbols.push( msg.obj );
+        // ...  initialize empty quotes for new symbols so that they can be tracked.
+        this.quotes.push( new Quote(msg.obj,0,0,0,0,0,"N/A",0,0,0) )  
+      }
+      else {
+        // A symbol has been removed ...
+
+        // Need to remove it from two places. The list of symbols ...
+        for (var stockSymbolIndex = this.symbols.length-1; stockSymbolIndex>=0;stockSymbolIndex--) {
+            if (this.symbols[stockSymbolIndex] == msg.obj) {
+              this.symbols.splice(stockSymbolIndex,1);
+              break;
+            }
+        }
+
+        // ... and the list of Quotes ...
+        for (var stockSymbolIndex = this.quotes.length-1; stockSymbolIndex>=0;stockSymbolIndex--) {
+          if (this.quotes[stockSymbolIndex].symbol == msg.obj) {
+            this.quotes.splice(stockSymbolIndex,1);
+            break;
+          }
+        }        
+      }
     });
     
     this.lookupStockSymbols();    
